@@ -10,7 +10,7 @@
 7. Visit http://localhost in your browser, and check if you can connect to FlytSIM or not.
 8. To get the Gazebo 3D GUI follow these steps:
     * Linux 
-      1. run this command in terminal ``xhost +local:root``. 
+      1. run this command in terminal ``xhost +local:flytsim``. 
       2. Once done restart Flytsim by running this command: ``docker-compose restart``
     
     * Windows 

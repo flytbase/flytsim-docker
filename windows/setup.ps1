@@ -1,11 +1,13 @@
 ﻿cd $PSScriptRoot
 
+
 write-host ("`nWelcome to FlytSIM setup utility.")  -foreground green
 write-host ("`nThis utility assumes that you already have installed ") -NoNewline
 write-host ("docker-for-windows") -foreground cyan -NoNewline
 write-host (" or ") -NoNewline
 write-host ("docker toolbox") -foreground cyan -NoNewline
 " in your machine."
+
 
 "`nChecking if Docker is installed or not ..." 
 
@@ -20,10 +22,7 @@ else
     if (($quit -eq 'y') -or ($quit -eq 'Y')) {exit}
 }
 
-write-host ("`nInstalling Xming Xserver for FlytSIM GUI") -foreground cyan
-write-host ("No need to change any default installation configuration") -foreground magenta
 
-pause
 
 "`nChecking if Xming is installed or not ..." 
 
@@ -33,15 +32,19 @@ if (Get-Command "xming" -errorAction SilentlyContinue)
 }
 else
 {
-    $process = (Start-Process '.\Xming-6-9-0-31-setup.exe' -PassThru -Wait)
+    write-host ("`nInstalling Xming Xserver for FlytSIM GUI") -foreground cyan
+    write-host ("No need to change any default installation configuration") -foreground magenta
+    pause
+
+    $process = (Start-Process '.\Xming-6-9-0-31-setup.exe' -PassThru -Wait -ErrorAction SilentlyContinue)
 
     if($process.ExitCode -ne 0)
     {
         Write-Host("`n`nXming installation FAILED/CANCELLED. Rendering of FlytSim's GUI is not possible without Xming`n") -ForegroundColor Red
-        $quit = Read-Host -Prompt 'Have you already installed Xming before? [yN]'
+        $quit = Read-Host -Prompt 'Have you already installed Xming before? [Yn]'
         if (($quit -eq 'n') -or ($quit -eq 'N')) 
         {
-            Write-Host("`n`nPlease install Xming, by running this script again. exiting...`n") -ForegroundColor Red}
+            Write-Host("`n`nPlease install Xming, by running this script again. exiting...`n") -ForegroundColor Red
             pause
             exit
         }

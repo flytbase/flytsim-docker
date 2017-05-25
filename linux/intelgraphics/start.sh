@@ -5,6 +5,8 @@ YLW='\033[1;33m'
 RED='\033[0;31m'
 GRN='\033[1;32m'
 NC='\033[0m' # No Color
+
+cd `dirname "$BASH_SOURCE"`
 is_new_img=0
 image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
@@ -40,6 +42,10 @@ is_installed() {
 	echo -e "${YLW}Detecting if docker, docker-compose, nvidia-docker, nvidia-docker-compose are already installed in this machine${NC}"
 	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+}
+
+is_running() {
+	#TODO
 }
 
 do_image_pull() {
@@ -121,6 +127,7 @@ docker_start() {
 
 launch_flytsim() {
 	is_installed
+	is_running
 	do_image_pull
 	allow_xhost
 	docker_start

@@ -5,6 +5,8 @@ YLW='\033[1;33m'
 RED='\033[0;31m'
 GRN='\033[1;32m'
 NC='\033[0m' # No Color
+
+cd `dirname "$BASH_SOURCE"`
 is_new_img=0
 image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`

@@ -1,0 +1,27 @@
+services:
+  flytsim:
+    command: /start.sh
+    container_name: flytsim
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    environment:
+    - DISPLAY
+    - QT_X11_NO_MITSHM=1
+    hostname: flytsim
+    image: flytbase/flytsim:latest
+    ports:
+    - 80:80
+    - 14550:14550
+    - 8080:8080
+    privileged: true
+    user: flytsim
+    volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    - nvidia_driver_378.13:/usr/local/nvidia:ro
+    working_dir: /home/flytsim
+version: '2'
+volumes:
+  nvidia_driver_378.13:
+    external: true

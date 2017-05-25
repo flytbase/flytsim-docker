@@ -1,8 +1,7 @@
 version: '2'  
 services:  
   flytsim:
-    restart: always
-    image: flytbase/flytsim:v4
+    image: flytbase/flytsim:v5
     container_name: flytsim
     ports:
       - "80:80"

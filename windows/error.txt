@@ -1,0 +1,9 @@
+ERROR: for flytsim  Cannot start service flytsim: driver failed programming external connectivity on endpoint flytsim (e
+caf9b6b37ec0afb12496b7e20a94e24d5907637a36c5249e482a64d675e2217): Error starting userland proxy: mkdir /port/tcp:0.0.0.0
+:14550:tcp:172.18.0.2:14550: input/output error
+ERROR: Encountered errors while bringing up the project.
+
+
+cannot execute powershell script
+unblock powershell script after gitclone?
+

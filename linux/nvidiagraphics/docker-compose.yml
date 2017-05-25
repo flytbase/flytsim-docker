@@ -1,0 +1,23 @@
+version: '2'  
+services:  
+  flytsim:
+    image: flytbase/flytsim:latest
+    container_name: flytsim
+    ports:
+     - "80:80"
+     - "14550:14550"
+     - "8080:8080"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: /start.sh
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+    privileged: true
+    user: flytsim    
+    working_dir: /home/flytsim
+    hostname: flytsim
+
+
+
+#949e6fe6afd1

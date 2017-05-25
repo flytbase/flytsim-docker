@@ -1,8 +1,7 @@
 version: '2'  
 services:  
   flytsim:
-    restart: always
-    image: flytbase/flytsim:v4
+    image: flytbase/flytsim:v5
     container_name: flytsim
     ports:
       - "80:80"
@@ -10,9 +9,9 @@ services:
       - "8080:8080"
     command: /start.sh
     environment:
-      - DISPLAY=192.168.99.1:0.0
+      - DISPLAY=192.168.1.69:1.0
       - QT_X11_NO_MITSHM=1
     privileged: true
-    user: flytsim    
+    user: flytsim
     working_dir: /home/flytsim
     hostname: flytsim

@@ -133,6 +133,7 @@ else
 fi
 
 echo -e "\n\n${GRN}Setup is now complete. Run ./start.sh to start your FlytSim container${NC}"
+
 # echo -e "${YLW}System is going to reboot in 10 seconds. You may press Ctrl+C now to prevent it, even though it is not recommended."
 # ( set -x; sleep 10 )
 

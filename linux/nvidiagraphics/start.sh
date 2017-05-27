@@ -6,11 +6,6 @@ RED='\033[0;31m'
 GRN='\033[1;32m'
 NC='\033[0m' # No Color
 
-cd `dirname "$BASH_SOURCE"`
-is_new_img=0
-image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
-container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
-
 echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
 if ! 'groups' | grep -q docker
@@ -38,16 +33,17 @@ if ! 'groups' | grep -q docker
 	fi
 fi
 
-is_installed() {
+is_installed_and_running() {
 	echo -e "${YLW}Detecting if docker, docker-compose, nvidia-docker, nvidia-docker-compose are already installed in this machine${NC}"
 	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if [ ! $(command -v nvidia-docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if [ ! $(command -v nvidia-docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+	if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 }
 
 do_image_pull() {
-	cd `dirname "$BASH_SOURCE"`
+	cd $root_loc
 	echo -e "${YLW}Downloading new container image from server, if available${NC}"
 	img_sha=$(docker images --format "{{.ID}}" $image_name)
 	docker-compose pull
@@ -60,10 +56,12 @@ do_image_pull() {
 			is_new_img=1
 			echo -e "${YLW}\nContainer image updated, backing up user container in $(echo $image_name | awk -F ':' '{print $1}'):backup${NC}"
 			docker-compose stop
+			docker rmi $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
-			rm -r backup_files
+			[ -d backup_files ] && rm -r backup_files
 			mkdir backup_files
-			docker cp $container_name:/flyt backup_files
+			docker cp $container_name:/flyt/userapps backup_files
+			docker cp $container_name:/flyt/flytos/flytcore/share/core_api/scripts backup_files
 			docker rm $container_name
 		fi
 	fi
@@ -86,49 +84,66 @@ open_browser() {
 	do
 		if pgrep flytlaunch > /dev/null
 			then
-			sleep 15
+			if [ $is_new_img -eq 1 ]; then sleep 30; else sleep 15; fi
 			#starting up flytconsole in browser 
-			sensible-browser "http://localhost/flytconsole" &
+			sensible-browser "http://localhost/flytconsole"
 			break
 		fi
 		sleep 1
 	done
 }
 
-docker_start() {
-	cd `dirname "$BASH_SOURCE"`
-	docker ps -a | grep $container_name > /dev/null
-
-	if [ $? -eq 0 ]
+push_backup_files() {
+	cd $root_loc
+	if [ $is_new_img -eq 1 ]
 		then
-		nvidia-docker-compose restart
-	else
-		nvidia-docker-compose up -d
+		while true
+		do
+			if docker ps | grep $container_name > /dev/null
+				then
+				sleep 0.5
+				docker cp backup_files/userapps $container_name:/flyt
+				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
+				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
+				rm -r backup_files
+				nvidia-docker-compose stop
+				nvidia-docker-compose up
+				break
+			fi
+			sleep 0.5
+		done
 	fi
+}
+
+docker_start() {
+	cd $root_loc
+	docker ps | grep $container_name > /dev/null
 
 	if [ $? -eq 0 ]
 		then
-		echo -e "${GRN}FlytSim docker successfully started${NC}"
-		echo -e "${GRN}Opening up http://localhost/flytconsole in your browser once system gets up and running\n\n${NC}"
-		if [ $is_new_img -eq 1 ]
-			then
-			docker cp backup_files/flyt/userapps $container_name:/flyt
-			[ -f backup_files/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt ] && docker cp backup_files/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
-			[ -f backup_files/flyt/flytos/flytcore/share/core_api/scripts/hwid ] && docker cp backup_files/flyt/flytos/flytcore/share/core_api/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
-			rm -r backup_files
-		fi
-	else
-		echo -e "${RED}ERROR${NC}: FlytSim docker could not be started, exiting...${NC}"
+		nvidia-docker-compose stop
+	fi
+	nvidia-docker-compose up
+	
+	if [ $? -ne 0 ]
+		then
+		echo -e "${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ...${NC}"
 		exit 1
 	fi
 }
 
 launch_flytsim() {
-	is_installed
+	is_installed_and_running
 	do_image_pull
 	allow_xhost
+	open_browser &
+	push_backup_files &
 	docker_start
-	open_browser
 }
+
+root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
+is_new_img=0
+image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
+container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
 
 launch_flytsim

@@ -98,7 +98,6 @@ $push_backup_files = {
         {
             docker cp backup_files/scripts/hwid ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/hwid
         }
-        docker cp bcbc.txt ${container_name}:/
         rm -r backup_files
         docker-compose restart
     }

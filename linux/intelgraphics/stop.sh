@@ -33,7 +33,7 @@ if ! 'groups' | grep -q docker
 	fi
 fi
 
-cd `dirname "$BASH_SOURCE"`
+cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 docker-compose stop
 if [ $? -ne 0 ]
 	then

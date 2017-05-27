@@ -106,10 +106,8 @@ if ! su -c 'groups' $SUDO_USER | grep -q docker
 	EOF
 fi
 
-echo -e "${YLW}Installing docker-compose${NC}"
-
 echo -e "\n\n${YLW}Installing docker-compose${NC}"
-sudo -H pip install docker-compose
+sudo -H pip install --upgrade docker-compose
 echo -e "${GRN}Congratulations! docker-compose installation is successful${NC}"
 
 echo -e "\n\n${GRN}Setup is now complete. Run ./start.sh to start your FlytSim container${NC}"

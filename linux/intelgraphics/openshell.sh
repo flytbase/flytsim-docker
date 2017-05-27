@@ -6,7 +6,11 @@ RED='\033[0;31m'
 GRN='\033[1;32m'
 NC='\033[0m' # No Color
 
-echo -e "${GRN}\nThis script is going to open a shell into the docker container in which FlytSim is running\n${NC}"
+echo -e "${GRN}\nThis script is going to open a bash shell into the docker container in which FlytSim is running\n${NC}"
+
+echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
+if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 
 if ! 'groups' | grep -q docker
 	then
@@ -33,7 +37,7 @@ if ! 'groups' | grep -q docker
 	fi
 fi
 
-cd `dirname "$BASH_SOURCE"`
+cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 docker exec -it `grep container_name docker-compose.yml | awk -F ' ' '{print $2}'` bash
 if [ $? -ne 0 ]
 	then

@@ -1,5 +1,5 @@
 ﻿$host.ui.RawUI.WindowTitle = “Openshell FlytSim”
-write-host ("`nThis script is going to start a bash shell inside the FlytSim container") -ForegroundColor Green
+write-host ("`nThis script is going to open a bash shell into the docker container in which FlytSim is running") -ForegroundColor Green
 
 if (-Not (Get-Command "docker" -errorAction SilentlyContinue))
 {

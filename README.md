@@ -4,30 +4,28 @@ This project deals with dockerisation of FlytSim App for easy deployment in any 
 
 ## Contents
 
- - [FlytSim as a Docker App](#flytsim-as-a-docker-app)
-    - [Contents](#contents)
-    - [What is FlytSim?](#what-is-flytsim)
-    - [Getting Started](#getting-started)
-      - [Prerequisites](#prerequisites)
-        - [Linux](#linux)
-        - [Windows](#windows)
-        - [MacOS](#macos)
-      - [Directory Structure](#directory-structure)
-    - [Install](#install)
-      - [Linux](#linux)
-        - [Intel GPU](#intel-gpu)
-        - [Nvidia GPU](#nvidia-gpu)
-      - [Windows](#windows)
-        - [Docker-for-Windows](#docker-for-windows)
-        - [Docker Toolbox for Windows [untested]](#docker-toolbox-for-windows)
-      - [Mac [Experimental]](#mac-[experimental])
-        - [Docker-for-Mac](#docker-for-mac)
-        - [Docker Toolbox for Mac [No Idea :(]](#docker-toolbox-for-mac)
-    - [Activate your FlytSim](#activate-your-flytsim)
-    - [DemoApps](#demoapps)
-    - [FAQs](#faqs)
-    - [Versioning](#versioning)
-    - [Authors](#authors)
+- [What is FlytSim?](#what-is-flytsim)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+    - [Linux](#linux)
+    - [Windows](#windows)
+    - [MacOS](#macos)
+  - [Directory Structure](#directory-structure)
+- [Install](#install)
+  - [Linux](#linux)
+    - [Intel GPU](#intel-gpu)
+    - [Nvidia GPU](#nvidia-gpu)
+  - [Windows](#windows)
+    - [Docker-for-Windows](#docker-for-windows)
+    - [Docker Toolbox for Windows [untested]](#docker-toolbox-for-windows-untested)
+  - [Mac [Experimental]](#mac-experimental)
+    - [Docker-for-Mac](#docker-for-mac)
+    - [Docker Toolbox for Mac [No Idea :(]](#docker-toolbox-for-mac-no-idea-)
+- [Activate your FlytSim](#activate-your-flytsim)
+- [DemoApps](#demoapps)
+- [FAQs](#faqs)
+- [Versioning](#versioning)
+- [Authors](#authors)
 
 
 ## What is FlytSim?
@@ -196,19 +194,19 @@ $ ./start.sh
 
 ## Activate your FlytSim
 
-Now that you have a working FlytSim setup, with FlytConsole at (http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim to enable few critical Navigation APIs. Once FlytConsole performs license validity checks and ask you to reboot, execute the *start* script again.
+Now that you have a working FlytSim setup, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim to enable few critical Navigation APIs. Once FlytConsole performs license validity checks and ask you to reboot, execute the *start* script again.
 
 *Note:* Without activation none of the demoapps would work.
 
 ## DemoApps
 
-Once you have got your FlytSim activated, with FlytConsole at (http://localhost/flytconsole) showing a valid Connection status, you are good to go ahead with trying some of our sample apps. Open up a shell inside the container by triggering *openshell* script. Once inside the container, try running [cpp demo app](http://docs.flytbase.com/docs/FlytOS/Developers/BuildingCustomApps/OnboardCPP.html#write-onboard-cpp) or [python demo app](http://docs.flytbase.com/docs/FlytOS/Developers/BuildingCustomApps/OnboardPython.html#write-onboard-python).
+Once you have got your FlytSim activated, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, you are good to go ahead with trying some of our sample apps. Open up a shell inside the container by triggering *openshell* script. Once inside the container, try running [cpp demo app](http://docs.flytbase.com/docs/FlytOS/Developers/BuildingCustomApps/OnboardCPP.html#write-onboard-cpp) or [python demo app](http://docs.flytbase.com/docs/FlytOS/Developers/BuildingCustomApps/OnboardPython.html#write-onboard-python).
 
 ## FAQs
 
-* For docker running on Windows/Mac, how much CPU and RAM should I allocate to Docker.
+Q. **For docker running on Windows/Mac, how much CPU and RAM should I allocate to Docker**.
 
-You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not alotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
+A. You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not alotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ gz stats
@@ -216,14 +214,16 @@ $ gz stats
 This should start printing Gazebo statistics on your shell. A typical output would be:
 
 ```bash
-Factor[1.00] SimTime[2. t23] RealTime[2.26] Paused[F]
+Factor[1.00] SimTime[2.23] RealTime[2.26] Paused[F]
 Factor[1.00] SimTime[2.44] RealTime[2.46] Paused[F]
 ```
 Make sure the value of your *Factor* is above 0.70 all the time, for smooth functioning of FlytSim. In case it is lower than that try increasing CPU allocation.
 
-* Why does my drone crash after takeoff?
+<br/>
 
-Typically, this happens when your CPU is not powerful enough to handle FlytSim's computational requirements. Open a shell inside the container using *openshell* script. Once inside run this command:
+Q. **Why does my drone crash after takeoff**?
+
+A. Typically, this happens when your CPU is not powerful enough to handle FlytSim's computational requirements. Open a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ gz stats
@@ -236,9 +236,11 @@ Factor[1.00] SimTime[2.44] RealTime[2.46] Paused[F]
 ```
 Make sure the value of your *Factor* is above 0.70 all the time, for smooth functioning of FlytSim. A value lower than that, would result in poor and unreliable performance of FlytSim.
 
-* What can I do if my laptop doesn't have enough power to run FlytSim?
+<br/>
 
-FlytSim consumes up a lot of CPU resources, in rendering its 3D Gazebo GUI. Turning it off could do wonders for you. Open a shell inside the container using *openshell* script. Once inside run this command:
+Q. **What can I do if my laptop doesn't have enough power to run FlytSim**?
+
+A. FlytSim consumes up a lot of CPU resources, in rendering its 3D Gazebo GUI. Turning it off could do wonders for you. Open a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ sudo nano /flyt/flytos/flytcore/share/core_api/scripts/flytsim.cfg
@@ -248,9 +250,11 @@ Edit this cfg file, and set value of gui_on parameter to "false". Once done, tri
 
 Alternatively, you can also setup 'apm' as your backend simulator. Being a non-gazebo, non-GUI based light weight SITL simulator, it might work just fine in your machine. To configure FlytSim to run APM, check the following FAQ.
 
-* I use APM firmware on my drone, and would like to use its simulator. Can you guys plug apm simulator in place of PX4?
+<br/>
 
-With FlytSim version > 1.3-1, we are launching APM simulation support as well. We have integrated [APM SITL on Linux](http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html) at the backend, to provide APM users a platform to test their applications. But since this SITL setup is not based on Gazebo, you won't get a GUI with it. To configure FlytSim to launch APM simulator, Open a shell inside the container using *openshell* script. Once inside run this command:
+Q. **I use APM firmware on my drone, and would like to use its simulator. Can you guys plug apm simulator in place of PX4**?
+
+A. With FlytSim version > 1.3-1, we are launching APM simulation support as well. We have integrated [APM SITL on Linux](http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html) at the backend, to provide APM users a platform to test their applications. But since this SITL setup is not based on Gazebo, you won't get a GUI with it. To configure FlytSim to launch APM simulator, Open a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ sudo nano /flyt/flytos/flytcore/share/core_api/scripts/flytsim.cfg
@@ -258,13 +262,17 @@ $ sudo nano /flyt/flytos/flytcore/share/core_api/scripts/flytsim.cfg
 
 Edit this cfg file, and set value of simpilot parameter to "apm". Once done, trigger the *start* script again, to restart the container.
 
-* I have a Linux device installed with Nvidia GPU switchable with Intel GPU. How do I know, what is being used?
+<br/>
 
-There are many ways to find this out. If you are using Ubuntu, go to System Settings -> Details look for Graphics Card details. You can also install `glxinfo` and run the command: `glxinfo | grep OpenGL` to view the GPU being used.
+Q. **I have a Linux device installed with Nvidia GPU switchable with Intel GPU. How do I know, what is being used**?
 
-* My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia propreitary drivers?
+A. There are many ways to find this out. If you are using Ubuntu, go to System Settings -> Details look for Graphics Card details. You can also install `glxinfo` and run the command: `glxinfo | grep OpenGL` to view the GPU being used.
 
-If you are on Ubuntu, follow this [nvidia gpu install guide](https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia) by Ubuntu.
+<br/>
+
+Q. **My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia propreitary drivers**?
+
+A. If you are on Ubuntu, follow this [nvidia gpu install guide](https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia) by Ubuntu.
 
 ## Versioning
 

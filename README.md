@@ -270,9 +270,9 @@ A. There are many ways to find this out. If you are using Ubuntu, go to System S
 
 <br/>
 
-Q. **My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia propreitary drivers**?
+**Q. My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia propreitary drivers?**
 
-A. If you are on Ubuntu, follow this [nvidia gpu install guide](https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia) by Ubuntu.
+**A.** If you are on Ubuntu, follow this [nvidia gpu install guide](https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia) by Ubuntu.
 
 ## Versioning
 

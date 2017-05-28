@@ -90,7 +90,7 @@ As mentioned before, FlytSim runs on top of Gazebo, which means it not only simu
 ```bash
 $ cd linux/intelgraphics
 ```
-3. If you are running Ubuntu, execute the setup.sh script which would install [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) on your machine. In case you are using *other flavours of Linux*, please install them manually by following their individual guides.
+3. If you are running Ubuntu, execute the setup.sh script which would install [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) on your machine. In case you are using any *other flavour of Linux*, please install them manually by following their individual guides.
 ```bash
 $ sudo ./setup.sh
 ```
@@ -117,7 +117,7 @@ $ sudo ./start.sh
 $ cd linux/nvidiagraphics
 ```
 3. Make sure you have installed proprietary Nvidia driver > 340.29. Visit related FAQ section to find how to install Nvidia driver.
-4. If you are running Ubuntu, execute the setup.sh script which would install [docker](https://docs.docker.com/engine/installation/), [docker-compose](https://docs.docker.com/compose/install/), [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) and [nvidia-docker-compose](https://github.com/eywalker/nvidia-docker-compose) on your machine. In case you are using *other flavours of Linux*, please install them manually by following individual guides.
+4. If you are running Ubuntu, execute the setup.sh script which would install [docker](https://docs.docker.com/engine/installation/), [docker-compose](https://docs.docker.com/compose/install/), [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) and [nvidia-docker-compose](https://github.com/eywalker/nvidia-docker-compose) on your machine. In case you are using any *other flavour of Linux*, please install them manually by following their individual guides.
 
 ```bash
 $ sudo ./setup.sh
@@ -142,7 +142,7 @@ $ sudo ./start.sh
 ```bash
 docker run hello-world
 ```
-2. Open up the folder where this repository was cloned. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its properties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. 
+2. Open up the folder where this repository was cloned. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its properties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. That's why it needs an x-server to be running on the Host OS.
 
 3. Start your FlytSim session by opening start.ps1 script with Windows Powershell application. This script would start a docker container running FlytSim app and also open a tab in Microsoft-Edge browser pointing to http://localhost/flytconsole, once it detects a successful launch.
 
@@ -194,7 +194,7 @@ $ ./start.sh
 
 ## Activate your FlytSim
 
-Now that you have a working FlytSim setup, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim to enable few critical Navigation APIs. Once FlytConsole performs license validity checks and ask you to reboot, execute the *start* script again.
+Now that you have a working FlytSim setup, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim. Once FlytConsole performs license validity checks and ask you to reboot, execute the *start* script again.
 
 *Note:* Without activation none of the demoapps would work.
 

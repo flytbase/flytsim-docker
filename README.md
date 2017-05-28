@@ -1,6 +1,6 @@
 # FlytSim as a Docker App
 
-This project deals with dockerisation of FlytSim App for easy deployment in any docker supported Linux, Windows and Mac environments.
+This project deals with dockerization of FlytSim App for easy deployment in any docker supported Linux, Windows and Mac environments.
 
 ## Contents
 
@@ -40,7 +40,7 @@ This section would deal with pre-requisites of this project, and a brief write u
 
 #### Linux
 
-Follow the [Docker installation guide](https://docs.docker.com/engine/installation/#supported-platforms) and make sure your flavour of Linux is supported by Docker. If you are running anything apart from Ubuntu, please follow the above guide and install docker in your machine. For Ubuntu users, we have any installtion script which would take care of it, details of which are in [Install](#install) section. It is preferable if you use Ubuntu 16.04 or above, but 14.04 or above might also work. 
+Follow the [Docker installation guide](https://docs.docker.com/engine/installation/#supported-platforms) and make sure your flavour of Linux is supported by Docker. If you are running anything apart from Ubuntu, please follow the above guide and install docker in your machine. For Ubuntu users, we have an installation script which would take care of it, details of which are in [Install](#install) section. It is preferable if you use Ubuntu 16.04 or above, but 14.04 or above might also work. 
 
 #### Windows
 
@@ -58,7 +58,7 @@ Eventually, all the directories have the following scripts:
 
 **setup** : This script as the name suggests sets up your machine to run FlytSim. You would get more information about it in the [Install](#install) section.
 
-**start** : This script launches a FlytSim docker container for you. It also opens up a tab in your browser connecting to http://localhost/flytconsole. Try waiting for around 30seconds after triggering this script, before manually opening up the link to FlytConsole.
+**start** : This script launches a FlytSim docker container for you. It also opens up a tab in your browser connecting to http://localhost/flytconsole. Try waiting for around 30 seconds after triggering this script, before manually opening up the link to FlytConsole.
 
 **stop** : As its clear from the name, it stops the FlytSim app and shuts down the docker container, but preserving its environment, which means executing the *start* script again, would start FlytSim app and resume the container session for you.
 
@@ -142,7 +142,7 @@ $ sudo ./start.sh
 ```bash
 docker run hello-world
 ```
-2. Open up the folder where this repository was cloned. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its propeties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. 
+2. Open up the folder where this repository was cloned. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its properties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. 
 
 3. Start your FlytSim session by opening start.ps1 script with Windows Powershell application. This script would start a docker container running FlytSim app and also open a tab in Microsoft-Edge browser pointing to http://localhost/flytconsole, once it detects a successful launch.
 
@@ -206,7 +206,7 @@ Once you have got your FlytSim activated, with [FlytConsole](http://localhost/fl
 
 * **For docker running on Windows/Mac, how much CPU and RAM should I allocate to Docker**.
 
-You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not alotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
+You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not allotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ gz stats
@@ -270,7 +270,7 @@ There are many ways to find this out. If you are using Ubuntu, go to System Sett
 
 <br/>
 
-* **My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia propreitary drivers?**
+* **My Linux device is installed with open source nouveau driver for Nvidia. How do I install Nvidia proprietary drivers?**
 
 If you are on Ubuntu, follow this [nvidia gpu install guide](https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia) by Ubuntu.
 

@@ -70,11 +70,7 @@ Eventually, all the directories have the following scripts:
 
 These instructions will get FlytSim up and running on your local machine for development and testing of your apps.
 
-Before moving ahead with FlytSim setup, clone this repository. Take a look at [git install guide](https://www.atlassian.com/git/tutorials/install-git) in case you don't have git installed in your machine.
-
-```bash
-$ git clone https://github.com/flytbase/flytsim-docker.git
-```
+Before moving ahead with FlytSim setup, download(.zip file) the latest stable release of this repository from our [release page](https://github.com/flytbase/flytsim-docker/tags) and unzip it to your preferable location.
 
 ### Linux
 
@@ -84,7 +80,7 @@ As mentioned before, FlytSim runs on top of Gazebo, which means it not only simu
 
 *Warning:* Follow this section only if your device is running on Intel GPU, failure to do so may lead to error while GUI rendering.
 
-1. Open a new terminal, and go to the directory where you have cloned this repository.
+1. Open a new terminal, and go to the directory where you have unzipped this repository.
 2. Get to intelgraphics directory inside linux directory.
 
 ```bash
@@ -110,7 +106,7 @@ $ sudo ./start.sh
 
 *Warning:* Follow this section only if your device is running on Nvidia GPU, failure to do so may lead to error while GUI rendering.
 
-1. Open a new terminal, and go to the directory where you have cloned this repository.
+1. Open a new terminal, and go to the directory where you have unzipped this repository.
 2. Get to nvidiagraphics directory inside linux directory.
 
 ```bash
@@ -142,7 +138,7 @@ $ sudo ./start.sh
 ```bash
 docker run hello-world
 ```
-2. Open up the folder where this repository was cloned. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its properties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. That's why it needs an x-server to be running on the Host OS.
+2. Open up the folder where this repository was unzipped. Get inside *Windows* directory, and open *setup.ps1* with Windows PowerShell application. You might have to unblock the file, by opening up its properties. This setup would install [Xming x-server](http://www.straightrunning.com/XmingNotes/) for rendering FlytSim's GUI. As mentioned before, FlytSim runs on top of Gazebo, which means it not only simulates the drone but also provides a GUI of the drone along with its environment. That's why it needs an x-server to be running on the Host OS.
 
 3. Start your FlytSim session by opening start.ps1 script with Windows Powershell application. This script would start a docker container running FlytSim app and also open a tab in Microsoft-Edge browser pointing to http://localhost/flytconsole, once it detects a successful launch.
 

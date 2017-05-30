@@ -13,28 +13,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
-#detect docker, exit if it is true
-echo -e "${YLW}Detecting if docker is already installed in this machine${NC}"
-if [ $(command -v docker) > /dev/null ]
-	then
-	cat >&2 <<-EOF
-
-	Warning: the "docker" command appears to already exist on this system.
-
-	If you already have Docker installed, this script can cause trouble, which is
-	why we're displaying this warning and provide the opportunity to cancel the
-	installation.
-
-	If you installed the current Docker package using this script and are using it
-	again to update Docker, you can safely ignore this message.
-
-	You may press Ctrl+C now to abort this script.
-
-	EOF
-	( set -x; sleep 10 )
-fi
-
-
 # <detect architecture, exit if not amd64>
 echo -e "${YLW}Verifying if this machine's architecture complies to this setup requirement or not${NC}"
 if [ $(uname -m) != "amd64" ] && [ $(uname -m) != "x86_64" ]

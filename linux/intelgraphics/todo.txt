@@ -1,8 +1,0 @@
-openshell: run it, 
-	enter random commnd, 
-	exit from shell, 
-	check if u getting error from openshell"Shell inside Flytsim's container could not be accessed. Is flytsim running? Try"
-
-start: check if docker daemon is running or not
-
-add warning above dockercomposeyml against user edits

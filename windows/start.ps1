@@ -41,7 +41,7 @@ function is_xming_installed_and_running {
     if (-Not (Get-Command "xming" -errorAction SilentlyContinue))
     {
         Write-Host("Xming NOT found. Please run setup script. Xming is required to get FlytSIM GUI. Ignore this warning if you don't want GUI") -ForegroundColor Red
-        $quit = Read-Host -Prompt 'Do you want to quit and execute setup script? [yN]'
+        $quit = Read-Host -Prompt 'Do you want to quit and execute setup script? [y/N]'
         if (($quit -eq 'y') -or ($quit -eq 'Y')) {exit}
     }
     else

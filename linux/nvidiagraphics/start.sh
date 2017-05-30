@@ -8,28 +8,9 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
-if ! 'groups' | grep -q docker
-	then
-	cat <<-EOF
-
-	If you would like to use Docker as a non-root user, you should now consider
-	adding your user to the "docker" group with something like:
-
-	  sudo usermod -aG docker $USER
-
-	Remember that you will have to log out and back in for this to take effect!
-
-	WARNING: Adding a user to the "docker" group will grant the ability to run
-	         containers which can be used to obtain root privileges on the
-	         docker host.
-	         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface
-	         for more information.
-
-	EOF
-	if [[ $EUID -ne 0 ]]; then
-		echo -e "${RED}ERROR${NC}: This script must be run as root, unless you follow the above command, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
-		exit 1
-	fi
+if [[ $EUID -ne 0 ]]; then
+	echo -e "${RED}ERROR${NC}: This script must be run as root, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
+	exit 1
 fi
 
 is_installed_and_running() {
@@ -39,6 +20,16 @@ is_installed_and_running() {
 	if [ ! $(command -v nvidia-docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if [ ! $(command -v nvidia-docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+}
+
+close_ports() {
+	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
+	pids=`echo $(lsof -t -i tcp:80 -s tcp:listen)`
+	[ "$pids" != "" ] && kill -9 $pids
+	pids=`echo $(lsof -t -i tcp:8080 -s tcp:listen)`
+	[ "$pids" != "" ] && kill -9 $pids
+	pids=`echo $(lsof -t -i :14550)`
+	[ "$pids" != "" ] && kill -9 $pids
 }
 
 do_image_pull() {
@@ -85,7 +76,9 @@ open_browser() {
 			then
 			if [ $is_new_img -eq 1 ]; then sleep 30; else sleep 15; fi
 			#starting up flytconsole in browser 
-			sensible-browser "http://localhost/flytconsole"
+			[ $(command -v firefox) > /dev/null ] && su -c 'firefox "http://localhost/flytconsole"' $SUDO_USER && break
+			[ $(command -v google-chrome) > /dev/null ] && su -c 'google-chrome "http://localhost/flytconsole"' $SUDO_USER && break
+			[ $(command -v chromium-browser) > /dev/null ] && su -c 'chromium-browser "http://localhost/flytconsole"' $SUDO_USER && break
 			break
 		fi
 		sleep 1
@@ -133,6 +126,7 @@ docker_start() {
 
 launch_flytsim() {
 	is_installed_and_running
+	close_ports
 	do_image_pull
 	allow_xhost
 	open_browser &

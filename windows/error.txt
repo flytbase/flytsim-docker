@@ -7,3 +7,4 @@ ERROR: Encountered errors while bringing up the project.
 cannot execute powershell script
 unblock powershell script after gitclone?
 
+TODO: reboot after setup

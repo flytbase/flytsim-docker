@@ -18,7 +18,7 @@ if (Get-Command "docker" -errorAction SilentlyContinue)
 else
 {
     "Sorry! docker installation could not be detected. Are you sure it has been installed correctly?"
-    $quit = Read-Host -Prompt 'Do you want to cancel this setup and install docker first? [yN]'
+    $quit = Read-Host -Prompt 'Do you want to cancel this setup and install docker first? [y/N]'
     if (($quit -eq 'y') -or ($quit -eq 'Y')) {exit}
 }
 
@@ -41,7 +41,7 @@ else
     if($process.ExitCode -ne 0)
     {
         Write-Host("`n`nXming installation FAILED/CANCELLED. Rendering of FlytSim's GUI is not possible without Xming`n") -ForegroundColor Red
-        $quit = Read-Host -Prompt 'Have you already installed Xming before? [Yn]'
+        $quit = Read-Host -Prompt 'Have you already installed Xming before? [Y/n]'
         if (($quit -eq 'n') -or ($quit -eq 'N')) 
         {
             Write-Host("`n`nPlease install Xming, by running this script again. exiting...`n") -ForegroundColor Red
@@ -75,5 +75,5 @@ else
     }
 }
 
-Write-Host("`nCongratulations! FlytSim setup is now complete. Go ahead and trigger start.ps1 script...`n") -ForegroundColor Green
+Write-Host("`nCongratulations! FlytSim setup is now complete. We are going to restart the computer now. Once done trigger start.ps1 script...`n") -ForegroundColor Green
 pause

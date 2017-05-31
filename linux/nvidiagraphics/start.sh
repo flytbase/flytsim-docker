@@ -22,6 +22,21 @@ is_installed_and_running() {
 	if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 }
 
+create_volume() {
+	#creating nvidia-docker volume if not available
+	driver_version=$(curl -s http://localhost:3476/docker/cli | awk -F ' ' '{print $2}' | awk -F ':' '{print $1}' | sed s/--volume=//g)
+	if docker volume ls | grep $driver_version > /dev/null
+		then
+		if [ "$(docker volume ls | grep nvidia-docker | tr -d ' ')" != "nvidia-docker"$driver_version ]
+			then
+			docker volume rm -f $driver_version > /dev/null
+			docker volume create -d nvidia-docker --name $driver_version > /dev/null
+		fi
+	else
+		docker volume create -d nvidia-docker --name $driver_version > /dev/null
+	fi
+}
+
 close_ports() {
 	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
 	pids=`echo $(lsof -t -i tcp:80 -s tcp:listen)`
@@ -69,16 +84,17 @@ allow_xhost() {
 
 open_browser() {
 	#sleep as system takes up time to start up
-	sleep 5
+	sleep 10
 	while true
 	do
 		if pgrep flytlaunch > /dev/null
 			then
-			if [ $is_new_img -eq 1 ]; then sleep 30; else sleep 15; fi
+			sleep 20
 			#starting up flytconsole in browser 
 			[ $(command -v firefox) > /dev/null ] && su -c 'firefox "http://localhost/flytconsole"' $SUDO_USER && break
 			[ $(command -v google-chrome) > /dev/null ] && su -c 'google-chrome "http://localhost/flytconsole"' $SUDO_USER && break
 			[ $(command -v chromium-browser) > /dev/null ] && su -c 'chromium-browser "http://localhost/flytconsole"' $SUDO_USER && break
+			echo -e "${RED}ERROR${NC}: Could not open any browser. Please open 'http://localhost/flytconsole' in your favorite browser"
 			break
 		fi
 		sleep 1
@@ -98,8 +114,6 @@ push_backup_files() {
 				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
 				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
 				rm -r backup_files
-				nvidia-docker-compose stop
-				nvidia-docker-compose up
 				break
 			fi
 			sleep 0.5
@@ -115,17 +129,17 @@ docker_start() {
 		then
 		nvidia-docker-compose stop
 	fi
-	nvidia-docker-compose up
 	
-	if [ $? -ne 0 ]
-		then
-		echo -e "${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ...${NC}"
-		exit 1
-	fi
+	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
+	[ $(command -v gnome-terminal) > /dev/null ] && { gnome-terminal -e '/bin/bash -c "nvidia-docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;} "'; exit 1; }
+	[ $(command -v x-terminal-emulator) > /dev/null ] && { x-terminal-emulator -e '/bin/bash -c "nvidia-docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
+	[ $(command -v xterm) > /dev/null ] && { xterm -e '/bin/bash -c "nvidia-docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
+	nvidia-docker-compose up || { echo -e "\n\n${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ..." && exit 1; }
 }
 
 launch_flytsim() {
 	is_installed_and_running
+	create_volume
 	close_ports
 	do_image_pull
 	allow_xhost

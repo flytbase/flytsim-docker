@@ -88,9 +88,5 @@ echo -e "\n\n${YLW}Installing docker-compose${NC}"
 sudo -H pip install --upgrade docker-compose
 echo -e "${GRN}Congratulations! docker-compose installation is successful${NC}"
 
-echo -e "\n\n${GRN}Setup is now complete. Run ./start.sh to start your FlytSim container${NC}"
+echo -e "\n\n${GRN}Setup is now complete. Run sudo ./start.sh to start your FlytSim container${NC}"
 
-# echo -e "${YLW}System is going to reboot in 10 seconds. You may press Ctrl+C now to prevent it, even though it is not recommended."
-# ( set -x; sleep 10 )
-
-# reboot

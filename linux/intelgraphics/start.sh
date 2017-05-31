@@ -72,11 +72,12 @@ open_browser() {
 	do
 		if pgrep flytlaunch > /dev/null
 			then
-			if [ $is_new_img -eq 1 ]; then sleep 30; else sleep 15; fi
+			sleep 20
 			#starting up flytconsole in browser 
 			[ $(command -v firefox) > /dev/null ] && su -c 'firefox "http://localhost/flytconsole"' $SUDO_USER && break
 			[ $(command -v google-chrome) > /dev/null ] && su -c 'google-chrome "http://localhost/flytconsole"' $SUDO_USER && break
 			[ $(command -v chromium-browser) > /dev/null ] && su -c 'chromium-browser "http://localhost/flytconsole"' $SUDO_USER && break
+			echo -e "${RED}ERROR${NC}: Could not open any browser. Please open 'http://localhost/flytconsole' in your favorite browser"
 			break
 		fi
 		sleep 1
@@ -96,8 +97,6 @@ push_backup_files() {
 				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
 				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
 				rm -r backup_files
-				docker-compose stop
-				docker-compose up
 				break
 			fi
 			sleep 0.5
@@ -113,13 +112,12 @@ docker_start() {
 		then
 		docker-compose stop
 	fi
-	docker-compose up
 
-	if [ $? -ne 0 ]
-		then
-		echo -e "${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ...${NC}"
-		exit 1
-	fi
+	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
+	[ $(command -v gnome-terminal) > /dev/null ] && { gnome-terminal -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;} "'; exit 1; }
+	[ $(command -v x-terminal-emulator) > /dev/null ] && { x-terminal-emulator -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
+	[ $(command -v xterm) > /dev/null ] && { xterm -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
+	docker-compose up || { echo -e "\n\n${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ..." && exit 1; }
 }
 
 launch_flytsim() {

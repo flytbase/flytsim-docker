@@ -110,9 +110,18 @@ else
 	echo -e "${GRN}Congratulations! nvidia-docker-compose installation is successful${NC}"
 fi
 
-echo -e "\n\n${GRN}Setup is now complete. Run ./start.sh to start your FlytSim container${NC}"
+#creating nvidia-docker volume if not available
+driver_version=$(curl -s http://localhost:3476/docker/cli | awk -F ' ' '{print $2}' | awk -F ':' '{print $1}' | sed s/--volume=//g)
+if docker volume ls | grep $driver_version > /dev/null
+	then
+	if [ "$(docker volume ls | grep nvidia-docker | tr -d ' ')" != "nvidia-docker"$driver_version ]
+		then
+		docker volume rm -f $driver_version > /dev/null
+		docker volume create -d nvidia-docker --name $driver_version > /dev/null
+	fi
+else
+	docker volume create -d nvidia-docker --name $driver_version > /dev/null
+fi
 
-# echo -e "${YLW}System is going to reboot in 10 seconds. You may press Ctrl+C now to prevent it, even though it is not recommended."
-# ( set -x; sleep 10 )
+echo -e "\n\n${GRN}Setup is now complete. Run sudo ./start.sh to start your FlytSim container${NC}"
 
-# reboot

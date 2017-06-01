@@ -8,33 +8,23 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to stop FlytSim session for you.\n${NC}"
 
-if ! 'groups' | grep -q docker
+cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
+container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
+if docker ps | grep $container_name > /dev/null
 	then
-	cat <<-EOF
-
-	If you would like to use Docker as a non-root user, you should now consider
-	adding your user to the "docker" group with something like:
-
-	  sudo usermod -aG docker $USER
-
-	Remember that you will have to log out and back in for this to take effect!
-
-	WARNING: Adding a user to the "docker" group will grant the ability to run
-	         containers which can be used to obtain root privileges on the
-	         docker host.
-	         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface
-	         for more information.
-
-	EOF
-	if [[ $EUID -ne 0 ]]; then
-		echo -e "${RED}ERROR${NC}: This script must be run as root, unless you follow the above command, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
+	docker-compose stop
+	if [ $? -ne 0 ]
+		then
+		echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not stop Flytsim container. Exiting ..."
 		exit 1
 	fi
-fi
-
-cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
-docker-compose stop
-if [ $? -ne 0 ]
-	then
-	echo "${RED}ERROR${NC}: FlytSim session could not be stopped${NC}"
+else
+	if docker ps -a | grep $container_name > /dev/null
+		then
+		echo -e "\n${YLW}WARNING: $container_name was already stopped. Exiting..."
+		exit 0
+	else
+		echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to remove. Trigger start.sh script to start FlytSim...Exiting ..."
+		exit 1
+	fi
 fi

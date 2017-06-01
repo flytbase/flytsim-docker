@@ -8,36 +8,22 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
-# if ! 'groups' | grep -q docker
-# 	then
-# 	cat <<-EOF
+is_installed_and_running() {
+	echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
+	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+	if ! pgrep com.docker.slirp > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+}
 
-# 	If you would like to use Docker as a non-root user, you should now consider
-# 	adding your user to the "docker" group with something like:
-
-# 	  sudo usermod -aG docker $USER
-
-# 	Remember that you will have to log out and back in for this to take effect!
-
-# 	WARNING: Adding a user to the "docker" group will grant the ability to run
-# 	         containers which can be used to obtain root privileges on the
-# 	         docker host.
-# 	         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface
-# 	         for more information.
-
-# 	EOF
-# 	if [[ $EUID -ne 0 ]]; then
-# 		echo -e "${RED}ERROR${NC}: This script must be run as root, unless you follow the above command, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
-# 		exit 1
-# 	fi
-# fi
-
-# is_installed_and_running() {
-# 	echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
-# 	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
-# 	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
-# 	if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
-# }
+close_ports() {
+	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
+	pids=`echo $(lsof -t -iTCP:80 -sTCP:LISTEN)`
+	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
+	pids=`echo $(lsof -t -iTCP:8080 -s tcp:listen)`
+	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
+	pids=`echo $(lsof -t -iTCP:14550 -sTCP:LISTEN)`
+	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
+}
 
 do_image_pull() {
 	cd $root_loc
@@ -66,14 +52,15 @@ do_image_pull() {
 
 open_browser() {
 	#sleep as system takes up time to start up
-	sleep 5
+	sleep 10
 	while true
 	do
 		if pgrep flytlaunch > /dev/null
 			then
-			if [ $is_new_img -eq 1 ]; then sleep 30; else sleep 15; fi
-			#starting up flytconsole in browser 
-			sensible-browser "http://localhost/flytconsole"
+			sleep 20
+			#starting up flytconsole in browser
+			{ open -a Google\ Chrome.app "http://localhost/flytconsole" && break; } || { open -a Safari.app "http://localhost/flytconsole" && break; }
+			echo -e "${RED}ERROR${NC}: Could not open any browser. Please open 'http://localhost/flytconsole' in your favorite browser"
 			break
 		fi
 		sleep 1
@@ -93,8 +80,6 @@ push_backup_files() {
 				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
 				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
 				rm -r backup_files
-				docker-compose stop
-				docker-compose up
 				break
 			fi
 			sleep 0.5
@@ -110,8 +95,10 @@ docker_start() {
 		then
 		docker-compose stop
 	fi
-	docker-compose up
-
+	
+	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
+	osascript -e 'tell application "Terminal" to do script "cd \"`pwd`\"; docker-compose up; exit"'
+	
 	if [ $? -ne 0 ]
 		then
 		echo -e "${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ...${NC}"
@@ -120,16 +107,17 @@ docker_start() {
 }
 
 launch_flytsim() {
-	#is_installed_and_running
+	is_installed_and_running
+	close_ports
 	do_image_pull
-	open_browser &
+	open_browser > /dev/null 2>&1 &
 	push_backup_files &
 	docker_start
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
 is_new_img=0
-image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
-container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
+image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
+container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 
 launch_flytsim

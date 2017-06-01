@@ -56,9 +56,22 @@ if ! 'groups' | grep -q docker
 fi
 
 cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
-docker exec -it `grep container_name docker-compose.yml | awk -F ' ' '{print $2}'` bash
-if [ $? -ne 0 ]
+container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
+if docker ps | grep $container_name > /dev/null
 	then
-	echo -e "${RED}ERROR${NC}: Shell inside Flytsim's container could not be accessed. Is flytsim running? Try executing ${YLW}start.sh${NC} first${NC}"
-	exit 1
+	docker exec -it $container_name bash
+	if [ $? -ne 0 ]
+		then
+		echo -e "\n${RED}ERROR${NC}: Problem encountered. Shell inside Flytsim's container could not be accessed. Try executing ${YLW}sudo ./start.sh${NC} again."
+		exit 1
+	fi
+else
+	if docker ps -a | grep $container_name > /dev/null
+		then
+		echo -e "\n${RED}ERROR${NC}: $container_name was found to be in 'stopped' state. Please execute ${YLW}sudo ./start.sh${NC} again."
+		exit 0
+	else
+		echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to get into. Trigger start.sh script to start FlytSim...Exiting ..."
+		exit 1
+	fi
 fi

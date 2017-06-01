@@ -54,8 +54,32 @@ then
 	fi
 
 	cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
-	docker stop `grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
-	docker rm `grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
+	container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
+	if docker ps | grep $container_name > /dev/null
+		then
+		docker-compose stop
+		docker rm -f $container_name
+		if [ $? -ne 0 ]
+			then
+			echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ..."
+			exit 1
+		fi
+	else
+		if docker ps -a | grep $container_name > /dev/null
+			then
+			docker rm $container_name
+			if [ $? -ne 0 ]
+				then
+				echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ..."
+				exit 1
+			fi
+		else
+			echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to remove. Trigger start.ps1 script to start FlytSim...Exiting ..."
+			exit 1
+		fi
+	fi
+	echo -e "\n{GRN}FlytSim container successfully deleted, trigger start.ps1 to start FlytSim..."
+	exit 0
 else
 	echo -e "\n${RED}Script aborted by user. Exiting..."
 	exit 1

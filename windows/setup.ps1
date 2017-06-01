@@ -8,21 +8,36 @@ write-host (" or ") -NoNewline
 write-host ("docker toolbox") -foreground cyan -NoNewline
 " in your machine."
 
-
-"`nChecking if Docker is installed or not ..." 
-
-if (Get-Command "docker" -errorAction SilentlyContinue)
+$windowsversion = $((Get-WmiObject -class Win32_OperatingSystem).Caption)
+if ($windowsversion -eq "Microsoft Windows 10 Home")
 {
-    "Docker detected with version: $((docker version | where {$_ -match '^ Version:'}).split(`"`n`")[0] -replace ' ' -replace 'Version:'). Continuing with setup ..."
+    Write-Host("`nError: Microsoft Windows 10 Home detected,") -ForegroundColor Red
+    Write-Host("Sorry FlytSim is not supported for this version of Windows yet. Upgrade to Windows 10 PRO. Exiting ...`n`n") -ForegroundColor Cyan
+    pause
+    exit
 }
-else
+elseif ($windowsversion -match "Microsoft Windows 10")
 {
-    "Sorry! docker installation could not be detected. Are you sure it has been installed correctly?"
-    $quit = Read-Host -Prompt 'Do you want to cancel this setup and install docker first? [y/N]'
-    if (($quit -eq 'y') -or ($quit -eq 'Y')) {exit}
+    "`nChecking if Docker is installed or not ..." 
+
+    if (Get-Command "docker" -errorAction SilentlyContinue)
+    {
+        "Docker detected with version: $((docker version | where {$_ -match '^ Version:'}).split(`"`n`")[0] -replace ' ' -replace 'Version:'). Continuing with setup ..."
+    }
+    else
+    {
+        "Sorry! docker installation could not be detected. Are you sure it has been installed correctly?"
+        $quit = Read-Host -Prompt 'Do you want to cancel this setup and install docker first? [y/N]'
+        if (($quit -eq 'y') -or ($quit -eq 'Y')) {exit}
+    }
 }
-
-
+else 
+{
+    Write-Host("`nError: $windowsversion detected,") -ForegroundColor Red
+    Write-Host("Sorry FlytSim is not supported for this version of Windows yet. Upgrade to Windows 10 PRO. Exiting ...`n`n") -ForegroundColor Cyan
+    pause
+    exit
+}
 
 "`nChecking if Xming is installed or not ..." 
 
@@ -36,7 +51,8 @@ else
     write-host ("No need to change any default installation configuration") -foreground magenta
     pause
 
-    $process = (Start-Process '.\Xming-6-9-0-31-setup.exe' -PassThru -Wait -ErrorAction SilentlyContinue)
+    write-host ("`nIf you don't get back access to shell, kindly exit Xming from system tray") -foreground cyan
+    $process = (Start-Process '.\Xming-6-9-0-31-setup.exe' -Wait -PassThru -ErrorAction SilentlyContinue)
 
     if($process.ExitCode -ne 0)
     {
@@ -75,5 +91,5 @@ else
     }
 }
 
-Write-Host("`nCongratulations! FlytSim setup is now complete. We are going to restart the computer now. Once done trigger start.ps1 script...`n") -ForegroundColor Green
+Write-Host("`nCongratulations! FlytSim setup is now complete. Now trigger start.ps1 script to start FlytSim...`n") -ForegroundColor Green
 pause

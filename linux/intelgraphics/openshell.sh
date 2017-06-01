@@ -69,7 +69,7 @@ else
 		echo -e "\n${RED}ERROR${NC}: $container_name was found to be in 'stopped' state. Please execute ${YLW}sudo ./start.sh${NC} again."
 		exit 0
 	else
-		echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to get into. Trigger start.sh script to start FlytSim...Exiting ..."
+		echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to get into. Trigger start.sh script to start FlytSim. Exiting ..."
 		exit 1
 	fi
 fi

@@ -23,7 +23,10 @@ function is_docker_installed_and_running {
         $windowsversion= $((Get-WmiObject -class Win32_OperatingSystem).Caption)
         if ($windowsversion -eq "Microsoft Windows 10 Home")
         {
-            #todo: check if docker daemon is running or not
+            Write-Host("`nError: Microsoft Windows 10 Home detected,") -ForegroundColor Red
+            Write-Host("Sorry FlytSim is not supported for this version of Windows yet. Upgrade to Windows 10 PRO. Exiting ...`n`n") -ForegroundColor Cyan
+            pause
+            exit    
         }
         elseif ($windowsversion -match "Microsoft Windows 10")
         {
@@ -33,6 +36,13 @@ function is_docker_installed_and_running {
                 pause
                 exit
             }
+        }
+        else 
+        {
+            Write-Host("`nError: $windowsversion detected,") -ForegroundColor Red
+            Write-Host("Sorry FlytSim is not supported for this version of Windows yet. Upgrade to Windows 10 PRO. Exiting ...`n`n") -ForegroundColor Cyan
+            pause
+            exit
         }
     }
 }
@@ -53,12 +63,34 @@ function is_xming_installed_and_running {
     }
 }
 
+function close_ports {
+    
+    Write-Host("Closing if any process is binded to ports (80,8080,14550)") -ForegroundColor Cyan
+    $portPID=$(netstat -ano | Select-String -List ":80" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    {
+        Stop-Process $portPID
+    }
+ 
+    $portPID=$(netstat -ano | Select-String -List ":8080" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    {
+        Stop-Process $portPID
+    }
+ 
+    $portPID=$(netstat -ano | Select-String -List ":14550" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    {
+        Stop-Process $portPID
+    }
+}
+
 function do_image_pull {
     Write-Host("Downloading new container image from server, if available") -ForegroundColor Cyan
     $img_sha=$(docker images --format "{{.ID}}" $image_name)
     docker-compose pull
     $img_new_sha=$(docker images --format "{{.ID}}" $image_name)
-	if ( "$img_sha" -ne "$img_new_sha" )
+    if ( "$img_sha" -ne "$img_new_sha" )
 	{
 		if ( docker ps -a | where {$_ -match $container_name} )
 		{
@@ -77,29 +109,34 @@ function do_image_pull {
 }
 
 $openBrowser = {
-    sleep 25
-    Start-Process "microsoft-edge:http://localhost/flytconsole"
+    sleep 30
+    Start-Process "chrome.exe" "http://localhost/flytconsole"
+    if ($? -ne "True"){
+        Start-Process "microsoft-edge:http://localhost/flytconsole"
+    }
 }
 
 $push_backup_files = {
-    param($is_new_img,$scriptroot)
+    param($is_new_img,$scriptroot,$container_name)
     cd $scriptroot
     if ($is_new_img -eq "1")
     {
-        sleep 1
-        docker cp backup_files/userapps ${container_name}:/flyt
-    
-        if (Test-Path backup_files/scripts/lic_data.txt -PathType Leaf)
-        {
-            docker cp backup_files/scripts/lic_data.txt ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
+        while ($true){
+            if ( docker ps | where {$_ -match $container_name} )
+            {
+                sleep 0.5
+                docker cp backup_files/userapps ${container_name}:/flyt    
+                if (Test-Path backup_files/scripts/lic_data.txt -PathType Leaf){
+                    docker cp backup_files/scripts/lic_data.txt ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
+                }    
+                if (Test-Path backup_files/scripts/hwid -PathType Leaf){
+                    docker cp backup_files/scripts/hwid ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/hwid
+                }
+                rm -r backup_files
+                break
+            }
+            sleep 0.5
         }
-    
-        if (Test-Path backup_files/scripts/hwid -PathType Leaf)
-        {
-            docker cp backup_files/scripts/hwid ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/hwid
-        }
-        rm -r backup_files
-        docker-compose restart
     }
 }
 
@@ -108,7 +145,8 @@ function start_docker {
     {
         docker-compose stop
     }
-    docker-compose up
+    Write-Host("`nLaunching FlytSim now in a new window.`n`n") -ForegroundColor Green
+    Start-Process powershell "docker-compose up"
     
     if ($? -ne "True"){
         Write-Host("`nError: Problem encountered. Could not start Flytsim session. Exiting ...") -ForegroundColor Red
@@ -121,11 +159,10 @@ cd $PSScriptRoot
 replaceip
 is_docker_installed_and_running
 is_xming_installed_and_running
+close_ports
 do_image_pull
 Start-Job -scriptblock $openBrowser | Out-Null
-Start-Job -scriptblock $push_backup_files -ArgumentList $Global:is_new_img,$PSScriptRoot | Out-Null
+Start-Job -scriptblock $push_backup_files -ArgumentList $Global:is_new_img,$PSScriptRoot,$container_name | Out-Null
 start_docker
-if ($Global:is_new_img -eq "1")
-{
-    pause
-}
+
+$host.enternestedprompt()

@@ -6,7 +6,7 @@ RED='\033[0;31m'
 GRN='\033[1;32m'
 NC='\033[0m' # No Color
 
-echo -e "\n${RED}CAUTION: This script is going to reset FlytSim's container to factory default for you. This would delete all of your files present inside the container\n${NC}"
+echo -e "\n${RED}CAUTION: This script is going to reset FlytSim's container to factory default. This would delete all of your files present inside the container\n${NC}"
 
 read -p "Do you still want to continue?[y/N] " -n 1 -r
 echo ""

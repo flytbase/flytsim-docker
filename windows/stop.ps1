@@ -2,7 +2,30 @@
 write-host ("`nThis script is going to stop FlytSim session for you.") -ForegroundColor Green
 
 cd $PSScriptRoot
-docker-compose stop
+
+$container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
+
+if ( docker ps | where {$_ -match $container_name} )
+{
+    docker-compose stop
+    if ($? -ne "True"){
+        Write-Host("`nError: Problem encountered. Could not stop Flytsim container. Exiting ...") -ForegroundColor Red
+        pause
+        exit
+    }
+}
+elseif ( docker ps -a | where {$_ -match $container_name} )
+{
+    Write-Host("`nWARNING: $container_name was already stopped. Exiting...") -ForegroundColor Cyan
+    pause
+    exit
+}
+else
+{
+    write-host ("`nERROR: It seems there is no container named $container_name to stop. Trigger start.ps1 script to start FlytSim...Exiting...`n") -ForegroundColor Red
+    pause
+    exit
+}
 
 if ($? -ne "True")
 {

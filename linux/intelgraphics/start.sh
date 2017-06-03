@@ -23,11 +23,11 @@ is_installed_and_running() {
 close_ports() {
 	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
 	pids=`echo $(lsof -t -i tcp:80 -s tcp:listen)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "docker-proxy" ] && kill -9 $pids
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 	pids=`echo $(lsof -t -i tcp:8080 -s tcp:listen)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "docker-proxy" ] && kill -9 $pids
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 	pids=`echo $(lsof -t -i tcp:14550 -s tcp:listen)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "docker-proxy" ] && kill -9 $pids
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 }
 
 do_image_pull() {

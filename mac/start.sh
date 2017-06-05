@@ -10,9 +10,8 @@ echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
 is_installed_and_running() {
 	echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
-	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
-	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
-	if ! pgrep com.docker.slirp > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please install Docker for Mac, ${NC}before running this script${NC}";exit 1;fi
+	if ! pgrep com.docker.slirp > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly? ${YLW}Try rebooting your machine or start docker from GUI${NC} before running this script${NC}";exit 1;fi
 }
 
 close_ports() {
@@ -97,7 +96,7 @@ docker_start() {
 	fi
 	
 	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
-	osascript -e 'tell application "Terminal" to do script "cd \"`pwd`\"; docker-compose up; exit"'
+	./deploy.sh ${PWD}/docker-compose.yml
 	
 	if [ $? -ne 0 ]
 		then
@@ -121,3 +120,9 @@ image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 
 launch_flytsim
+
+
+
+
+
+osascript -e 'set dir to quoted form of $pwd; tell application "Terminal" to do script "cd " & dir'

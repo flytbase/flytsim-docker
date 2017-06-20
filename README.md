@@ -30,7 +30,7 @@ This project deals with dockerization of FlytSim App for easy deployment in any 
 
 ## What is FlytSim?
 
-FlytSim offers a 3D SITL(Software In The Loop) simulation environment for testing user apps without the drone hardware. It is a ROS-Gazebo based environment where the drone and its world are simulated, programmatically generating the state variables, while the control algorithms applied are same as onboard the drone.
+FlytSim offers a 3D SITL(Software In The Loop) simulation environment for testing user apps without the drone hardware. It is a ROS-Gazebo based environment(valid only for PX4-SITL) where the drone and its world are simulated, programmatically generating the state variables, while the control algorithms applied are same as onboard the drone.
 
 ## Getting Started
 
@@ -40,15 +40,15 @@ This section would deal with pre-requisites of this project, and a brief write u
 
 #### Linux
 
-Follow the [Docker installation guide](https://docs.docker.com/engine/installation/#supported-platforms) and make sure your flavour of Linux is supported by Docker. If you are running anything apart from Ubuntu, please follow the above guide and install docker in your machine. For Ubuntu users, we have an installation script which would take care of it, details of which are in [Install](#install) section. It is preferable if you use Ubuntu 16.04 or above, but 14.04 or above might also work. 
+Follow the [Docker installation guide](https://docs.docker.com/engine/installation/#supported-platforms) and make sure your flavour of Linux is supported by Docker. If you are running anything apart from Ubuntu, please follow the above guide and install docker in your machine. For Ubuntu users, we have an installation script which would take care of it, details of which are in [Install](#install) section. It is preferable if you use Ubuntu 14.04 or above. 
 
 #### Windows
 
-Visit installation guide for [Docker-for-Windows](https://docs.docker.com/docker-for-windows/install/) and [Docker Toolbox (legacy)](https://docs.docker.com/toolbox/toolbox_install_windows/) and install either of them, whichever is supported by your Windows OS. Typically 64bit Windows 10 Pro, Enterprise and Education support the newer *Docker-for-Windows*. To know more about it, click [here](https://docs.docker.com/docker-for-windows/install/#what-to-know-before-you-install).
+Visit installation guide for [Docker-for-Windows](https://docs.docker.com/docker-for-windows/install/) and install it if it is supported by your Windows OS. Typically 64bit Windows 10 Pro, Enterprise and Education support the newer *Docker-for-Windows*. To know more about it, click [here](https://docs.docker.com/docker-for-windows/install/#what-to-know-before-you-install). Currently we DO NOT support [Docker Toolbox (legacy)](https://docs.docker.com/toolbox/toolbox_install_windows/) and have no plan to do it in near future.
 
 #### MacOS
 
-Visit installation guide for [Docker-for-Mac](https://docs.docker.com/docker-for-mac/install/) and [Docker Toolbox](https://docs.docker.com/toolbox/toolbox_install_mac/) and install either of them, whichever is supported by your Mac OS. Typically OS X El Capitan 10.11 and newer macOS releases support the newer *Docker-for-Mac*. To know more about it, click [here](https://docs.docker.com/docker-for-mac/install/#what-to-know-before-you-install).
+Visit installation guide for [Docker-for-Mac](https://docs.docker.com/docker-for-mac/install/) and install it if it is supported by your Mac OS. Typically OS X El Capitan 10.11 and newer macOS releases support the newer *Docker-for-Mac*. To know more about it, click [here](https://docs.docker.com/docker-for-mac/install/#what-to-know-before-you-install). Currently we DO NOT support [Docker Toolbox (legacy)](https://docs.docker.com/toolbox/toolbox_install_mac/) and have no plan to do it in near future.
 
 ### Directory Structure
 
@@ -64,7 +64,9 @@ Eventually, all the directories have the following scripts:
 
 **openshell** : This script would launch a bash shell inside the FlytSim container. You can execute this script in parallel to launch multiple shells.
 
-**docker-compose.yml** : This is a yml specification of the docker container being started by start script. Please refrain from editing this file, unless you are an expert on Docker.
+**reset** : This script resets FlytSim container to factory default settings.
+
+**docker-compose.yml** : This is a yml specification of the docker container being started by start script. **Please refrain from editing this file, unless you are an expert on Docker.**
 
 ## Install
 
@@ -142,34 +144,8 @@ docker run hello-world
 
 3. Start your FlytSim session by opening start.ps1 script with Windows Powershell application. This script would start a docker container running FlytSim app and also open a tab in Microsoft-Edge browser pointing to http://localhost/flytconsole, once it detects a successful launch.
 
-#### Docker Toolbox for Windows [untested]
-
-1. Make sure you have installed Docker Toolbox.
-2. Launch Docker Toolbox from Start menu. This would create a small linux VM, and attach a terminal to it. All the below steps MUST be run only on this terminal.
-3. Clone this repository.
-
-```bash
-$ git clone https://github.com/flytbase/flytsim-docker.git
-```
-4. Get to intelgraphics directory inside linux directory.
-
-```bash
-$ cd linux/intelgraphics
-```
-
-5. Launch a sample docker example to make sure everything it is indeed setup correctly.
-
-```bash
-$ docker run hello-world
-```
-
-5. Start your FlytSim session by executing start.sh script. This script would start a docker container running FlytSim app and also open a tab in browser pointing to http://localhost/flytconsole, once it detects a successful launch.
-
-```bash
-$ sudo ./start.sh
-```
-
-### Mac [Experimental]
+#### Docker Toolbox for Windows [Unsupported]
+### Mac
 
 #### Docker-for-Mac
 
@@ -186,11 +162,11 @@ docker run hello-world
 $ ./start.sh
 ```
 
-#### Docker Toolbox for Mac [No Idea :(]
+#### Docker Toolbox for Mac [Unsupported]
 
 ## Activate your FlytSim
 
-Now that you have a working FlytSim setup, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim. Once FlytConsole performs license validity checks and ask you to reboot, execute the *start* script again.
+Now that you have a working FlytSim setup, with [FlytConsole](http://localhost/flytconsole) showing a valid Connection status, activate your FlytSim. Once FlytConsole performs license validity checks and asks you to reboot, execute the *start* script again.
 
 *Note:* Without activation none of the demoapps would work.
 
@@ -202,7 +178,9 @@ Once you have got your FlytSim activated, with [FlytConsole](http://localhost/fl
 
 * **For docker running on Windows/Mac, how much CPU and RAM should I allocate to Docker**.
 
-You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not allotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
+FlytSim with its **default configuration(APM-SITL)** is very light weight and allocating 2GB RAM and 4 CPUs should be just fine.
+
+FlytSim if configured to use **PX4-SITL** is quite computationally heavy. You can allocate 2GB RAM for Docker. For CPU, you could begin with allocating 4CPUs, but since it depends on your device's CPU power, the number may vary for different machines. FlytSim is a very power intensive application, and it won't function correctly if not allotted enough resources. To know whether FlytSim is not getting deprived of resources, try opening a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ gz stats
@@ -219,7 +197,7 @@ Make sure the value of your *Factor* is above 0.70 all the time, for smooth func
 
 * **Why does my drone crash after takeoff**?
 
-Typically, this happens when your CPU is not powerful enough to handle FlytSim's computational requirements. Open a shell inside the container using *openshell* script. Once inside run this command:
+Typically, this happens when your CPU is not powerful enough to handle FlytSim's computational requirements. If you are running Docker for Windows/Mac, increase CPU and RAM allocated to docker. If you have configured FlytSim to run **PX4-SITL**, open a shell inside the container using *openshell* script. Once inside run this command:
 
 ```bash
 $ gz stats
@@ -248,21 +226,15 @@ Alternatively, you can also setup 'apm' as your backend simulator. Being a non-g
 
 <br/>
 
-* **I use APM firmware on my drone, and would like to use its simulator. Can you guys plug apm simulator in place of PX4**?
+* **I use PX4 firmware on my drone, and would like to use its simulator. How to configure FlytSim to run PX4-SITL instead of its default(APM_SITL)**?
 
-With FlytSim version > 1.3-1, we are launching APM simulation support as well. We have integrated [APM SITL on Linux](http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html) at the backend, to provide APM users a platform to test their applications. But since this SITL setup is not based on Gazebo, you won't get a GUI with it. To configure FlytSim to launch APM simulator, Open a shell inside the container using *openshell* script. Once inside run this command:
-
-```bash
-$ sudo nano /flyt/flytos/flytcore/share/core_api/scripts/flytsim.cfg
-```
-
-Edit this cfg file, and set value of simpilot parameter to "apm". Once done, trigger the *start* script again, to restart the container.
+To configure FlytSim to launch PX4 simulator, start the FlytSim simulator. Open **flytconsole**, and click top-right corner setup button. It would open a config window, go to Sim Settings tab, and select PX4 as *sim pilot*. You could configure other FlytSim settings as well.
 
 <br/>
 
 * **I have a Linux device installed with Nvidia GPU switchable with Intel GPU. How do I know, what is being used**?
 
-There are many ways to find this out. If you are using Ubuntu, go to System Settings -> Details look for Graphics Card details. You can also install `glxinfo` and run the command: `glxinfo | grep OpenGL` to view the GPU being used.
+If you want APM-SITL, you don't need to worry about it, and go ahead with Intel GPU steps. For PX4-SITL, there are many ways to find this out. If you are using Ubuntu, go to System Settings -> Details look for Graphics Card details. You can also install `glxinfo` and run the command: `glxinfo | grep OpenGL` to view the GPU being used.
 
 <br/>
 

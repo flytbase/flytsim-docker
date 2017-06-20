@@ -15,10 +15,10 @@ This project deals with dockerization of FlytSim App for easy deployment in any 
   - [Linux](#linux)
     - [Intel GPU](#intel-gpu)
     - [Nvidia GPU](#nvidia-gpu)
-  - [Windows](#windows)
+  - [Windows](#windows-1)
     - [Docker-for-Windows](#docker-for-windows)
     - [Docker Toolbox for Windows [Unsupported]](#docker-toolbox-for-windows-unsupported)
-  - [Mac](#mac)
+  - [MacOS](#macos-1)
     - [Docker-for-Mac](#docker-for-mac)
     - [Docker Toolbox for Mac [Unsupported]](#docker-toolbox-for-mac-unsupported)
 - [Activate your FlytSim](#activate-your-flytsim)
@@ -145,7 +145,7 @@ docker run hello-world
 3. Start your FlytSim session by opening start.ps1 script with Windows Powershell application. This script would start a docker container running FlytSim app and also open a tab in Microsoft-Edge browser pointing to http://localhost/flytconsole, once it detects a successful launch.
 
 #### Docker Toolbox for Windows [Unsupported]
-### Mac
+### MacOS
 
 #### Docker-for-Mac
 

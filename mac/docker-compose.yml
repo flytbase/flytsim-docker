@@ -6,7 +6,7 @@ services:
     container_name: flytsim
     ports:
       - "80:80"
-      - "14550:14550"
+      - "5760:5760"
       - "8080:8080"
     command: /start.sh
     privileged: true

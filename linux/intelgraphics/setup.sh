@@ -8,14 +8,14 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to install docker-ce and docker-compose on your machine\n${NC}"
 #check if script run with sudo permission
-if [[ $EUID -ne 0 ]]; then
+if [[ "$EUID" -ne 0 ]]; then
 	echo -e "\n${RED}ERROR${NC}: This script must be run as root, ${YLW}run with sudo ./setup.sh, ${NC}exiting ...${NC}" 
 	exit 1
 fi
 
 # <detect architecture, exit if not amd64>
 echo -e "${YLW}Verifying if this machine's architecture complies to this setup requirement or not${NC}"
-if [ $(uname -m) != "amd64" ] && [ $(uname -m) != "x86_64" ]
+if [ "$(uname -m)" != "amd64" ] && [ "$(uname -m)" != "x86_64" ]
 	then
 	cat >&2 <<-EOF
 
@@ -27,13 +27,13 @@ fi
 
 # <detect ubuntu, exit if false>
 echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
-if [ ! $(command -v lsb_release) > /dev/null ]
+if [ ! $(command -v lsb_release) > /dev/null ] || [ ! $(command -v pip) > /dev/null ]
 	then
 	apt-get update
-	apt-get install lsb-release
+	apt-get install lsb-release python-pip
 fi
 
-if [ $(lsb_release -si) != "Ubuntu" ]
+if [ "$(lsb_release -si)" != "Ubuntu" ]
 	then
 	echo -e "${RED}ERROR${NC}: This script would only work on Ubuntu, but $(lsb_release -si) detected, exiting...${NC}"
 fi
@@ -45,7 +45,7 @@ if sudo -H pip show docker-py; then sudo -H pip uninstall -y docker-py; fi
 
 if [ "$(lsb_release --codename --short)" = "trusty" ]
 	then
-	echo -e "${YLW}Installing extra dependencies for Ubuntu 14.04"
+	echo -e "${YLW}Installing extra dependencies for Ubuntu 14.04${NC}"
 	apt-get update
 	apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
 fi

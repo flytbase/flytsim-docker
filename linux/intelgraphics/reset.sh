@@ -10,11 +10,11 @@ echo -e "\n${RED}CAUTION: This script is going to reset FlytSim's container to f
 
 read -p "Do you still want to continue?[y/N] " -n 1 -r
 echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]
+if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
 	if ! 'groups' | grep -q docker
 		then
-		if [[ $EUID -ne 0 ]]; then
+		if [[ "$EUID" -ne 0 ]]; then
 			cat <<-EOF
 
 			If you would like to use Docker as a non-root user, you should now consider
@@ -59,28 +59,28 @@ then
 		then
 		docker-compose stop
 		docker rm -f $container_name
-		if [ $? -ne 0 ]
+		if [ "$?" -ne 0 ]
 			then
-			echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ..."
+			echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ...${NC}"
 			exit 1
 		fi
 	else
 		if docker ps -a | grep $container_name > /dev/null
 			then
 			docker rm $container_name
-			if [ $? -ne 0 ]
+			if [ "$?" -ne 0 ]
 				then
-				echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ..."
+				echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not remove Flytsim container. Exiting ...${NC}"
 				exit 1
 			fi
 		else
-			echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to remove. Trigger start.ps1 script to start FlytSim...Exiting ..."
+			echo -e "\n${RED}ERROR${NC}: It seems there is no container named $container_name to remove. Trigger start.ps1 script to start FlytSim...Exiting ...${NC}"
 			exit 1
 		fi
 	fi
-	echo -e "\n{GRN}FlytSim container successfully deleted, trigger start.ps1 to start FlytSim..."
+	echo -e "\n{GRN}FlytSim container successfully deleted, trigger start.ps1 to start FlytSim...${NC}"
 	exit 0
 else
-	echo -e "\n${RED}Script aborted by user. Exiting..."
+	echo -e "\n${RED}Script aborted by user. Exiting...${NC}"
 	exit 1
 fi

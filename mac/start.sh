@@ -8,6 +8,11 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
+if [[ "$EUID" -ne 0 ]]; then
+	echo -e "${RED}ERROR${NC}: This script must be run as root, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
+	exit 1
+fi
+
 is_installed_and_running() {
 	echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
 	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please install Docker for Mac, ${NC}before running this script${NC}";exit 1;fi
@@ -15,13 +20,13 @@ is_installed_and_running() {
 }
 
 close_ports() {
-	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
+	echo -e "${YLW}Closing processes binded to ports (80,8080,5760)${NC}"
 	pids=`echo $(lsof -t -iTCP:80 -sTCP:LISTEN)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
-	pids=`echo $(lsof -t -iTCP:8080 -s tcp:listen)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
-	pids=`echo $(lsof -t -iTCP:14550 -sTCP:LISTEN)`
-	[ "$pids" != "" ] && [ $(ps -p "$pids" -o comm=) != "com.docker.slirp" ] && kill -9 $pids
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
+	pids=`echo $(lsof -t -iTCP:8080 -sTCP:LISTEN)`
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
+	pids=`echo $(lsof -t -iTCP:5760 -sTCP:LISTEN)`
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
 }
 
 do_image_pull() {
@@ -54,7 +59,7 @@ open_browser() {
 	sleep 10
 	while true
 	do
-		if pgrep flytlaunch > /dev/null
+		if docker ps | grep $container_name > /dev/null
 			then
 			sleep 20
 			#starting up flytconsole in browser
@@ -68,7 +73,7 @@ open_browser() {
 
 push_backup_files() {
 	cd $root_loc
-	if [ $is_new_img -eq 1 ]
+	if [ "$is_new_img" -eq 1 ]
 		then
 		while true
 		do
@@ -95,8 +100,7 @@ docker_start() {
 		docker-compose stop
 	fi
 	
-	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
-	./deploy.sh ${PWD}/docker-compose.yml
+	docker-compose up
 	
 	if [ $? -ne 0 ]
 		then
@@ -120,9 +124,3 @@ image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 
 launch_flytsim
-
-
-
-
-
-osascript -e 'set dir to quoted form of $pwd; tell application "Terminal" to do script "cd " & dir'

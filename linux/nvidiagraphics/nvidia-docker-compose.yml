@@ -13,7 +13,7 @@ services:
     image: flytbase/flytsim:latest
     ports:
     - 80:80
-    - 14550:14550
+    - 5760:5760
     - 8080:8080
     privileged: true
     user: flytsim

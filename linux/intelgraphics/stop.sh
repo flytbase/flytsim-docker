@@ -10,7 +10,7 @@ echo -e "${GRN}\nThis script is going to stop FlytSim session for you.\n${NC}"
 
 if ! 'groups' | grep -q docker
 	then
-	if [[ $EUID -ne 0 ]]; then
+	if [[ "$EUID" -ne 0 ]]; then
 		cat <<-EOF
 
 		If you would like to use Docker as a non-root user, you should now consider
@@ -53,8 +53,8 @@ cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
 if docker ps | grep $container_name > /dev/null
 	then
-	docker-compose stop
-	if [ $? -ne 0 ]
+	docker-compose stop -t 30
+	if [ "$?" -ne 0 ]
 		then
 		echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not stop Flytsim container. Exiting ..."
 		exit 1

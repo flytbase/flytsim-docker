@@ -16,7 +16,7 @@ if [ ! $(command -v nvidia-docker-compose) > /dev/null ]; then echo -e "${RED}ER
 
 if ! 'groups' | grep -q docker
 	then
-	if [[ $EUID -ne 0 ]]; then
+	if [[ "$EUID" -ne 0 ]]; then
 		cat <<-EOF
 
 		If you would like to use Docker as a non-root user, you should now consider
@@ -60,7 +60,7 @@ container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'
 if docker ps | grep $container_name > /dev/null
 	then
 	docker exec -it $container_name bash
-	if [ $? -ne 0 ]
+	if [ "$?" -ne 0 ]
 		then
 		echo -e "\n${RED}ERROR${NC}: Problem encountered. Shell inside Flytsim's container could not be accessed. Try executing ${YLW}sudo ./start.sh${NC} again."
 		exit 1

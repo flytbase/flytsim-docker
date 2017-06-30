@@ -6,8 +6,8 @@ services:
     container_name: flytsim
     ports:
       - "80:80"
-      - "14550:14550"
       - "8080:8080"
+      - "5760:5760"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command: /start.sh

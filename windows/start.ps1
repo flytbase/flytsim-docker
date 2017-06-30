@@ -65,7 +65,7 @@ function is_xming_installed_and_running {
 
 function close_ports {
     
-    Write-Host("Closing if any process is binded to ports (80,8080,14550)") -ForegroundColor Cyan
+    Write-Host("Closing if any process is binded to ports (80,8080,5760)") -ForegroundColor Cyan
     $portPID=$(netstat -ano | Select-String -List ":80" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
     if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
     {
@@ -78,7 +78,7 @@ function close_ports {
         Stop-Process $portPID
     }
  
-    $portPID=$(netstat -ano | Select-String -List ":14550" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
+    $portPID=$(netstat -ano | Select-String -List ":5760" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
     if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
     {
         Stop-Process $portPID

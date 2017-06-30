@@ -7,7 +7,7 @@ $container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -ma
 
 if ( docker ps | where {$_ -match $container_name} )
 {
-    docker-compose stop
+    docker-compose stop -t 30
     if ($? -ne "True"){
         Write-Host("`nError: Problem encountered. Could not stop Flytsim container. Exiting ...") -ForegroundColor Red
         pause

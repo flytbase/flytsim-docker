@@ -12,8 +12,8 @@ cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 if docker ps | grep $container_name > /dev/null
 	then
-	docker-compose stop
-	if [ $? -ne 0 ]
+	docker-compose stop -t 30
+	if [ "$?" -ne 0 ]
 		then
 		echo -e "\n${RED}ERROR${NC}: Problem encountered. Could not stop Flytsim container. Exiting ..."
 		exit 1

@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to start FlytSim session for you\n${NC}"
 
-if [[ $EUID -ne 0 ]]; then
+if [[ "$EUID" -ne 0 ]]; then
 	echo -e "${RED}ERROR${NC}: This script must be run as root, ${YLW}run with sudo ./start.sh, ${NC}exiting ...${NC}" 
 	exit 1
 fi
@@ -38,12 +38,12 @@ create_volume() {
 }
 
 close_ports() {
-	echo -e "${YLW}Closing processes binded to ports (80,8080,14550)${NC}"
+	echo -e "${YLW}Closing processes binded to ports (80,8080,5760)${NC}"
 	pids=`echo $(lsof -t -i tcp:80 -s tcp:listen)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 	pids=`echo $(lsof -t -i tcp:8080 -s tcp:listen)`
-	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)"" != "docker-proxy" ] && kill -9 $pids
-	pids=`echo $(lsof -t -i tcp:14550 -s tcp:listen)`
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
+	pids=`echo $(lsof -t -i tcp:5760 -s tcp:listen)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 }
 
@@ -75,10 +75,9 @@ do_image_pull() {
 allow_xhost() {
 	#allowing xhost access to GUI
 	xhost +local:flytsim > /dev/null
-	if [ $? -ne 0 ]
+	if [ "$?" -ne 0 ]
 		then
 		echo -e "${YLW}WARNING: xhost returned with error. You might not be able to visualize FlytSim's GUI${NC}"
-		exit 1
 	fi	
 }
 
@@ -103,7 +102,7 @@ open_browser() {
 
 push_backup_files() {
 	cd $root_loc
-	if [ $is_new_img -eq 1 ]
+	if [ "$is_new_img" -eq 1 ]
 		then
 		while true
 		do
@@ -125,7 +124,7 @@ docker_start() {
 	cd $root_loc
 	docker ps | grep $container_name > /dev/null
 
-	if [ $? -eq 0 ]
+	if [ "$?" -eq 0 ]
 		then
 		nvidia-docker-compose stop
 	fi

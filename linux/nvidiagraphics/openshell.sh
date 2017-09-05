@@ -13,6 +13,7 @@ if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docke
 if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 if [ ! $(command -v nvidia-docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 if [ ! $(command -v nvidia-docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: nvidia-docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 
 if ! 'groups' | grep -q docker
 	then
@@ -57,6 +58,8 @@ fi
 
 cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
+echo -e "${YLW}Launching a shell in $container_name ${NC}"
+
 if docker ps | grep $container_name > /dev/null
 	then
 	docker exec -it $container_name bash

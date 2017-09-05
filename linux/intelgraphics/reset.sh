@@ -8,6 +8,11 @@ NC='\033[0m' # No Color
 
 echo -e "\n${RED}CAUTION: This script is going to reset FlytSim's container to factory default. This would delete all of your files present inside the container\n${NC}"
 
+echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
+if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if ! pgrep dockerd > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly, try rebooting your machine? ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+
 read -p "Do you still want to continue?[y/N] " -n 1 -r
 echo ""
 if [[ "$REPLY" =~ ^[Yy]$ ]]

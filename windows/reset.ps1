@@ -1,6 +1,20 @@
 $host.ui.RawUI.WindowTitle = “Reset FlytSim”
 write-host ("`nCAUTION: This script is going to reset FlytSim's container to factory default. This would delete all of your files present inside the container.") -ForegroundColor Cyan
 
+if (-Not (Get-Command "docker" -errorAction SilentlyContinue))
+{
+    Write-Host("`nError: Docker NOT found. Please install docker in your machine. Exiting ...") -ForegroundColor Red
+    pause
+    exit
+}
+
+Get-Process "docker for windows" -ErrorAction SilentlyContinue | Out-Null
+if ($? -ne "True"){
+    Write-Host("`nError: Docker daemon does not seem to be running. Please restart docker in your machine. Exiting ...") -ForegroundColor Red
+    pause
+    exit
+}
+
 $continue = Read-Host -Prompt 'Do you still want to continue? [y/N]'
 
 if (($continue -eq 'y') -or ($continue -eq 'Y')) 

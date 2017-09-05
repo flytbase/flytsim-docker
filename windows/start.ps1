@@ -122,7 +122,7 @@ function start_docker {
         docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
     }
     Write-Host("`nLaunching FlytSim now in a new window.`n`n") -ForegroundColor Green
-    Start-Process powershell "docker-compose up"
+    Start-Process powershell "docker-compose up; if ('$?' -ne 'True') {pause}"
     
     if ($? -ne "True"){
         Write-Host("`nError: Problem encountered. Could not start Flytsim session. Exiting ...") -ForegroundColor Red

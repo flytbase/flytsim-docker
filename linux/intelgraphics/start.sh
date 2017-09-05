@@ -41,15 +41,9 @@ do_image_pull() {
 		then
 		if docker ps -a | grep $container_name > /dev/null
 			then
-			is_new_img=1
 			echo -e "${YLW}\nContainer image updated, backing up user container in $(echo $image_name | awk -F ':' '{print $1}'):backup${NC}"
 			docker-compose stop
-			docker rmi $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
-			[ -d backup_files ] && rm -r backup_files
-			mkdir backup_files
-			docker cp $container_name:/flyt/userapps backup_files
-			docker cp $container_name:/flyt/flytos/flytcore/share/core_api/scripts backup_files
 			docker rm $container_name
 		fi
 	fi
@@ -69,9 +63,9 @@ open_browser() {
 	sleep 10
 	while true
 	do
-		if pgrep flytlaunch > /dev/null
-			then
-			sleep 20
+		if docker ps | grep $container_name > /dev/null
+		then
+			sleep 30
 			#starting up flytconsole in browser 
 			[ $(command -v firefox) > /dev/null ] && su -c 'firefox "http://localhost/flytconsole"' $SUDO_USER && break
 			[ $(command -v google-chrome) > /dev/null ] && su -c 'google-chrome "http://localhost/flytconsole"' $SUDO_USER && break
@@ -81,26 +75,6 @@ open_browser() {
 		fi
 		sleep 1
 	done
-}
-
-push_backup_files() {
-	cd $root_loc
-	if [ "$is_new_img" -eq 1 ]
-		then
-		while true
-		do
-			if docker ps | grep $container_name > /dev/null
-				then
-				sleep 0.5
-				docker cp backup_files/userapps $container_name:/flyt
-				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
-				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
-				rm -r backup_files
-				break
-			fi
-			sleep 0.5
-		done
-	fi
 }
 
 docker_start() {
@@ -125,12 +99,10 @@ launch_flytsim() {
 	do_image_pull
 	allow_xhost
 	open_browser > /dev/null 2>&1 &
-	push_backup_files &
 	docker_start
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
-is_new_img=0
 image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
 

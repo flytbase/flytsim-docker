@@ -30,7 +30,7 @@ echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
 if [ ! $(command -v lsb_release) > /dev/null ] || [ ! $(command -v pip) > /dev/null ]
 	then
 	apt-get update
-	apt-get install lsb-release python-pip
+	apt-get install -y lsb-release python-pip
 fi
 
 if [ "$(lsb_release -si)" != "Ubuntu" ]

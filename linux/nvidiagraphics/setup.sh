@@ -30,7 +30,7 @@ echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
 if [ ! $(command -v lsb_release) > /dev/null ] || [ ! $(command -v pip) > /dev/null ]
 	then
 	apt-get update
-	apt-get install lsb-release python-pip
+	apt-get install -y lsb-release python-pip
 fi
 
 if [ "$(lsb_release -si)" != "Ubuntu" ]
@@ -112,6 +112,12 @@ fi
 
 #creating nvidia-docker volume if not available
 driver_version=$(curl -s http://localhost:3476/docker/cli | awk -F ' ' '{print $2}' | awk -F ':' '{print $1}' | sed s/--volume=//g)
+if [ -z $driver_version ]
+	then
+	echo -e "${RED}ERROR${NC}: Cannot detect Nvidia Graphics driver. Please install Nvidia driver following our Troubleshooting guide at \n \t http://docs.flytbase.com/docs/FlytSim/docker/troubleshooting.html#how-do-i-install-nvidia-proprietary-drivers-for-my-linux-os . Exiting...${NC}"
+	exit 1
+fi
+
 if docker volume ls | grep $driver_version > /dev/null
 	then
 	if [ "$(docker volume ls | grep nvidia-docker | tr -d ' ')" != "nvidia-docker"$driver_version ]

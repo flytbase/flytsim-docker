@@ -2,7 +2,6 @@
 write-host ("`nThis script is going to start FlytSim session for you.")  -foreground green
 write-host ("`nVisit http://localhost/flytconsole in your browser to check connectivity with FlytSim`n`n")  -foreground cyan
 
-$is_new_img="0"
 $image_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'image.+$' }).Trim().Split(" ")[1]
 $container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
 
@@ -94,56 +93,33 @@ function do_image_pull {
 	{
 		if ( docker ps -a | where {$_ -match $container_name} )
 		{
-			$Global:is_new_img="1"
             Write-Host("Container image updated, backing up user container in $($image_name.Split(":")[0]):backup") -ForegroundColor Cyan
 			docker-compose stop
-            docker rmi "$($image_name.Split(":")[0]):backup"
 			docker commit -m "backing up user data on $(date)" $container_name "$($image_name.Split(":")[0]):backup"
-			rm -r backup_files -errorAction SilentlyContinue
-			mkdir backup_files -errorAction SilentlyContinue | Out-Null
-			docker cp "${container_name}:/flyt/userapps" backup_files
-            docker cp "${container_name}:/flyt/flytos/flytcore/share/core_api/scripts" backup_files
 			docker rm $container_name
 		}
 	}
 }
 
 $openBrowser = {
-    sleep 30
+    sleep 40
     Start-Process "chrome.exe" "http://localhost/flytconsole"
     if ($? -ne "True"){
         Start-Process "microsoft-edge:http://localhost/flytconsole"
     }
 }
 
-$push_backup_files = {
-    param($is_new_img,$scriptroot,$container_name)
-    cd $scriptroot
-    if ($is_new_img -eq "1")
-    {
-        while ($true){
-            if ( docker ps | where {$_ -match $container_name} )
-            {
-                sleep 0.5
-                docker cp backup_files/userapps ${container_name}:/flyt    
-                if (Test-Path backup_files/scripts/lic_data.txt -PathType Leaf){
-                    docker cp backup_files/scripts/lic_data.txt ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
-                }    
-                if (Test-Path backup_files/scripts/hwid -PathType Leaf){
-                    docker cp backup_files/scripts/hwid ${container_name}:/flyt/flytos/flytcore/share/core_api/scripts/hwid
-                }
-                rm -r backup_files
-                break
-            }
-            sleep 0.5
-        }
-    }
-}
-
 function start_docker {
+    $UUID = $(get-wmiobject Win32_ComputerSystemProduct  | Select-Object -ExpandProperty UUID)
     if ( docker ps | where {$_ -match $container_name} )
     {
+        docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
         docker-compose stop
+    }
+    else
+    {
+        docker-compose create
+        docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
     }
     Write-Host("`nLaunching FlytSim now in a new window.`n`n") -ForegroundColor Green
     Start-Process powershell "docker-compose up"
@@ -162,7 +138,4 @@ is_xming_installed_and_running
 close_ports
 do_image_pull
 Start-Job -scriptblock $openBrowser | Out-Null
-Start-Job -scriptblock $push_backup_files -ArgumentList $Global:is_new_img,$PSScriptRoot,$container_name | Out-Null
 start_docker
-
-$host.enternestedprompt()

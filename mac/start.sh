@@ -16,6 +16,7 @@ fi
 is_installed_and_running() {
 	echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
 	if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please install Docker for Mac, ${NC}before running this script${NC}";exit 1;fi
+	if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
 	if ! pgrep com.docker.slirp > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly? ${YLW}Try rebooting your machine or start docker from GUI${NC} before running this script${NC}";exit 1;fi
 }
 
@@ -40,15 +41,9 @@ do_image_pull() {
 		then
 		if docker ps -a | grep $container_name > /dev/null
 			then
-			is_new_img=1
 			echo -e "${YLW}\nContainer image updated, backing up user container in $(echo $image_name | awk -F ':' '{print $1}'):backup${NC}"
 			docker-compose stop
-			docker rmi $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
-			[ -d backup_files ] && rm -r backup_files
-			mkdir backup_files
-			docker cp $container_name:/flyt/userapps backup_files
-			docker cp $container_name:/flyt/flytos/flytcore/share/core_api/scripts backup_files
 			docker rm $container_name
 		fi
 	fi
@@ -60,8 +55,8 @@ open_browser() {
 	while true
 	do
 		if docker ps | grep $container_name > /dev/null
-			then
-			sleep 20
+		then
+			sleep 30
 			#starting up flytconsole in browser
 			{ open -a Google\ Chrome.app "http://localhost/flytconsole" && break; } || { open -a Safari.app "http://localhost/flytconsole" && break; }
 			echo -e "${RED}ERROR${NC}: Could not open any browser. Please open 'http://localhost/flytconsole' in your favorite browser"
@@ -71,33 +66,18 @@ open_browser() {
 	done
 }
 
-push_backup_files() {
-	cd $root_loc
-	if [ "$is_new_img" -eq 1 ]
-		then
-		while true
-		do
-			if docker ps | grep $container_name > /dev/null
-				then
-				sleep 0.5
-				docker cp backup_files/userapps $container_name:/flyt
-				[ -f backup_files/scripts/lic_data.txt ] && docker cp backup_files/scripts/lic_data.txt $container_name:/flyt/flytos/flytcore/share/core_api/scripts/lic_data.txt
-				[ -f backup_files/scripts/hwid ] && docker cp backup_files/scripts/hwid $container_name:/flyt/flytos/flytcore/share/core_api/scripts/hwid
-				rm -r backup_files
-				break
-			fi
-			sleep 0.5
-		done
-	fi
-}
-
 docker_start() {
 	cd $root_loc
+	UUID=`system_profiler SPHardwareDataType | awk '/UUID/ { print $3; }'`
 	docker ps | grep $container_name > /dev/null
 
 	if [ $? -eq 0 ]
-		then
+	then
+		docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
 		docker-compose stop
+	else
+		docker-compose create
+		docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
 	fi
 	
 	docker-compose up
@@ -114,12 +94,10 @@ launch_flytsim() {
 	close_ports
 	do_image_pull
 	open_browser > /dev/null 2>&1 &
-	push_backup_files &
 	docker_start
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
-is_new_img=0
 image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 

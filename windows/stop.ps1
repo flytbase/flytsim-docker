@@ -3,6 +3,20 @@ write-host ("`nThis script is going to stop FlytSim session for you.") -Foregrou
 
 cd $PSScriptRoot
 
+if (-Not (Get-Command "docker" -errorAction SilentlyContinue))
+{
+    Write-Host("`nError: Docker NOT found. Please install docker in your machine. Exiting ...") -ForegroundColor Red
+    pause
+    exit
+}
+
+Get-Process "docker for windows" -ErrorAction SilentlyContinue | Out-Null
+if ($? -ne "True"){
+    Write-Host("`nError: Docker daemon does not seem to be running. Please restart docker in your machine. Exiting ...") -ForegroundColor Red
+    pause
+    exit
+}
+
 $container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
 
 if ( docker ps | where {$_ -match $container_name} )

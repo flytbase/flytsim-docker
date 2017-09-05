@@ -8,6 +8,11 @@ NC='\033[0m' # No Color
 
 echo -e "${GRN}\nThis script is going to stop FlytSim session for you.\n${NC}"
 
+echo -e "${YLW}Detecting if docker and docker-compose are already installed in this machine${NC}"
+if [ ! $(command -v docker) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if [ ! $(command -v docker-compose) > /dev/null ]; then echo -e "${RED}ERROR${NC}: docker-compose does not seem to be installed. ${YLW}Please run ./setup.sh, ${NC}before running this script${NC}";exit 1;fi
+if ! pgrep com.docker.slirp > /dev/null; then echo -e "${RED}ERROR${NC}: docker does not seem to be running, has it been installed correctly? ${YLW}Try rebooting your machine or start docker from GUI${NC} before running this script${NC}";exit 1;fi
+
 cd `cd $(dirname $BASH_SOURCE) ; pwd -P`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 if docker ps | grep $container_name > /dev/null

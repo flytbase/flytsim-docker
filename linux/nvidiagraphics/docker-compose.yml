@@ -2,7 +2,7 @@
 version: '3'
 services:
   flytsim:
-    image: flytbase/flytsim:latest
+    image: flytbase/flytsimv2:latest
     container_name: flytsim
     ports:
       - "80:80"

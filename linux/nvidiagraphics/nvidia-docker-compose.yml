@@ -1,6 +1,7 @@
 services:
   flytsim:
-    command: /start.sh
+    build: .
+    command: sudo /start.sh Linux
     container_name: flytsim
     devices:
     - /dev/nvidia0
@@ -10,7 +11,8 @@ services:
     - DISPLAY
     - QT_X11_NO_MITSHM=1
     hostname: flytsim
-    image: flytbase/flytsim:latest
+    labels:
+      com.nvidia.volumes.needed: nvidia_driver
     ports:
     - 80:80
     - 5760:5760
@@ -19,9 +21,12 @@ services:
     user: flytsim
     volumes:
     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    - flytsim:/flyt
+    - /run/udev:/run/udev:ro
     - nvidia_driver_378.13:/usr/local/nvidia:ro
     working_dir: /home/flytsim
-version: '2'
+version: '3'
 volumes:
+  flytsim: null
   nvidia_driver_378.13:
     external: true

@@ -20,6 +20,8 @@ services:
     user: flytsim
     working_dir: /home/flytsim
     hostname: flytsim
+    labels:
+      com.nvidia.volumes.needed: nvidia_driver
 
 volumes:
   flytsim:

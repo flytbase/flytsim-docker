@@ -2,13 +2,13 @@
 version: '3'
 services:
   flytsim:
-    image: flytbase/flytsimv2:latest
+    build: .
     container_name: flytsim
     ports:
       - "80:80"
       - "5760:5760"
       - "8080:8080"
-    command: /start.sh Windows
+    command: sudo /start.sh Windows
     volumes:
       - flytsim:/flyt
     environment:

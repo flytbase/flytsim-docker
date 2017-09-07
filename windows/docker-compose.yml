@@ -12,7 +12,7 @@ services:
     volumes:
       - flytsim:/flyt
     environment:
-      - DISPLAY=192.168.0.107:1.0
+      - DISPLAY=192.168.0.103:1.0
       - QT_X11_NO_MITSHM=1
     privileged: true
     user: flytsim

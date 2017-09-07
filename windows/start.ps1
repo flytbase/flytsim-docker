@@ -35,6 +35,24 @@ function is_docker_installed_and_running {
                 pause
                 exit
             }
+            Get-Process "com.docker.db" -ErrorAction SilentlyContinue | Out-Null
+            if ($? -ne "True"){
+                Write-Host("`nError: Docker daemon does not seem to be running. Please restart docker in your machine. Exiting ...") -ForegroundColor Red
+                pause
+                exit
+            }
+            Get-Process "com.docker.service" -ErrorAction SilentlyContinue | Out-Null
+            if ($? -ne "True"){
+                Write-Host("`nError: Docker daemon does not seem to be running. Please restart docker in your machine. Exiting ...") -ForegroundColor Red
+                pause
+                exit
+            }
+            Get-Process "com.docker.proxy" -ErrorAction SilentlyContinue | Out-Null
+            if ($? -ne "True"){
+                Write-Host("`nError: Docker daemon does not seem to be running. Please restart docker in your machine. Exiting ...") -ForegroundColor Red
+                pause
+                exit
+            }
         }
         else 
         {
@@ -66,20 +84,23 @@ function close_ports {
     
     Write-Host("Closing if any process is binded to ports (80,8080,5760)") -ForegroundColor Cyan
     $portPID=$(netstat -ano | Select-String -List ":80" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
-    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp") -and ($(ps -Id $portPID).ProcessName -ne "vpnkit"))
     {
+        echo "port 80 seems to be in use by $(ps -Id $portPID).ProcessName"
         Stop-Process $portPID
     }
  
     $portPID=$(netstat -ano | Select-String -List ":8080" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
-    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp") -and ($(ps -Id $portPID).ProcessName -ne "vpnkit"))
     {
+        echo "port 8080 seems to be in use by $(ps -Id $portPID).ProcessName"
         Stop-Process $portPID
     }
  
     $portPID=$(netstat -ano | Select-String -List ":5760" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
-    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp"))
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp") -and ($(ps -Id $portPID).ProcessName -ne "vpnkit"))
     {
+        echo "port 5760 seems to be in use by $(ps -Id $portPID).ProcessName"
         Stop-Process $portPID
     }
 }
@@ -113,16 +134,18 @@ function start_docker {
     $UUID = $(get-wmiobject Win32_ComputerSystemProduct  | Select-Object -ExpandProperty UUID)
     if ( docker ps | where {$_ -match $container_name} )
     {
-        docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
+        docker exec --user root $container_name bash -c "echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid"
         docker-compose stop
     }
     else
     {
-        docker-compose create
-        docker exec $container_name 'echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid'
+        close_ports
+        docker-compose up -d
+        docker exec --user root $container_name bash -c "echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid"
+        docker-compose stop -t 1
     }
     Write-Host("`nLaunching FlytSim now in a new window.`n`n") -ForegroundColor Green
-    Start-Process powershell "docker-compose up; if ('$?' -ne 'True') {pause}"
+    Start-Process powershell "docker-compose up; pause"
     
     if ($? -ne "True"){
         Write-Host("`nError: Problem encountered. Could not start Flytsim session. Exiting ...") -ForegroundColor Red
@@ -135,7 +158,8 @@ cd $PSScriptRoot
 replaceip
 is_docker_installed_and_running
 is_xming_installed_and_running
-close_ports
 do_image_pull
-Start-Job -scriptblock $openBrowser | Out-Null
+Start-Job -scriptblock $openBrowser -Name "openbrowser" | Out-Null
 start_docker
+
+Wait-Job "openbrowser" | Out-Null

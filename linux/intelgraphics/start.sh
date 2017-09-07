@@ -84,6 +84,8 @@ docker_start() {
 	if [ "$?" -eq 0 ]
 		then
 		docker-compose stop
+	else
+		close_ports
 	fi
 
 	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
@@ -95,7 +97,6 @@ docker_start() {
 
 launch_flytsim() {
 	is_installed_and_running
-	close_ports
 	do_image_pull
 	allow_xhost
 	open_browser > /dev/null 2>&1 &

@@ -2,7 +2,7 @@
 write-host ("`nThis script is going to start FlytSim session for you.")  -foreground green
 write-host ("`nVisit http://localhost/flytconsole in your browser to check connectivity with FlytSim`n`n")  -foreground cyan
 
-$image_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'image.+$' }).Trim().Split(" ")[1]
+$image_name=$((get-content $PSScriptRoot\Dockerfile) | where {$_ -match 'FROM.+$' }).Trim().Split(" ")[1]
 $container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
 
 function replaceip {
@@ -108,9 +108,10 @@ function close_ports {
 function do_image_pull {
     Write-Host("Downloading new container image from server, if available") -ForegroundColor Cyan
     $img_sha=$(docker images --format "{{.ID}}" $image_name)
-    docker-compose pull
+    docker pull $image_name
+
     $img_new_sha=$(docker images --format "{{.ID}}" $image_name)
-    if ( "$img_sha" -ne "$img_new_sha" )
+    if ( ("$img_sha" -ne "") -and ("$img_sha" -ne "$img_new_sha") )
 	{
 		if ( docker ps -a | where {$_ -match $container_name} )
 		{
@@ -118,6 +119,7 @@ function do_image_pull {
 			docker-compose stop
 			docker commit -m "backing up user data on $(date)" $container_name "$($image_name.Split(":")[0]):backup"
 			docker rm $container_name
+            docker-compose build
 		}
 	}
 }

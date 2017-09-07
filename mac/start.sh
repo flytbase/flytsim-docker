@@ -34,10 +34,10 @@ do_image_pull() {
 	cd $root_loc
 	echo -e "${YLW}Downloading new container image from server, if available${NC}"
 	img_sha=$(docker images --format "{{.ID}}" $image_name)
-	docker-compose pull
+	docker pull $image_name
 
 	img_new_sha=$(docker images --format "{{.ID}}" $image_name)
-	if [ "$img_sha" != "$img_new_sha" ]
+	if [ ! -z "$img_sha" ] && [ "$img_sha" != "$img_new_sha" ]
 		then
 		if docker ps -a | grep $container_name > /dev/null
 			then
@@ -45,6 +45,7 @@ do_image_pull() {
 			docker-compose stop
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker rm $container_name
+			docker-compose build
 		fi
 	fi
 }
@@ -99,7 +100,7 @@ launch_flytsim() {
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
-image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
+image_name=`grep FROM Dockerfile | awk -F ' ' '{print $2}' | tr -d "\r"`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 
 launch_flytsim

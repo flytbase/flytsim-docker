@@ -13,6 +13,43 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit 1
 fi
 
+apt_lock=0
+dpkg_lock=0
+
+while fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+	echo -e "\n${RED}ERROR${NC}: Waiting for other apt process to finish${NC}"
+
+	if [ $apt_lock -gt 10 ]
+		then
+		pids=`echo $(lsof -t /var/lib/apt/lists/lock)`
+		if [ "$pids" != "" ]
+			then
+			kill -9 $pids
+			echo -e "killing apt-get process"
+		fi
+	fi
+	apt_lock=`expr $apt_lock + 1`
+
+	sleep 1
+done
+
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+	echo -e "\n${RED}ERROR${NC}: Waiting for other dpkg process to finish${NC}"
+
+	if [ $dpkg_lock -gt 10 ]
+		then
+		pids=`echo $(lsof -t /var/lib/dpkg/lock)`
+		if [ "$pids" != "" ]
+			then
+			echo -e "killing dpkg process"
+			kill -9 $pids
+		fi
+	fi
+	apt_lock=`expr $dpkg_lock + 1`
+
+	sleep 1
+done
+
 # <detect architecture, exit if not amd64>
 echo -e "${YLW}Verifying if this machine's architecture complies to this setup requirement or not${NC}"
 if [ "$(uname -m)" != "amd64" ] && [ "$(uname -m)" != "x86_64" ]
@@ -25,14 +62,14 @@ if [ "$(uname -m)" != "amd64" ] && [ "$(uname -m)" != "x86_64" ]
 	exit 1
 fi
 
-# <detect ubuntu, exit if false>
-echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
 if [ ! $(command -v lsb_release) > /dev/null ] || [ ! $(command -v pip) > /dev/null ]
 	then
 	apt-get update
 	apt-get install -y lsb-release python-pip
 fi
 
+# <detect ubuntu, exit if false>
+echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
 if [ "$(lsb_release -si)" != "Ubuntu" ]
 	then
 	echo -e "${RED}ERROR${NC}: This script would only work on Ubuntu, but $(lsb_release -si) detected, exiting...${NC}"
@@ -88,5 +125,21 @@ echo -e "\n\n${YLW}Installing docker-compose${NC}"
 sudo -H pip install --upgrade docker-compose
 echo -e "${GRN}Congratulations! docker-compose installation is successful${NC}"
 
-echo -e "\n\n${GRN}Setup is now complete. Run sudo ./start.sh to start your FlytSim container${NC}"
+root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
+cd $root_loc
 
+echo -e "\n${YLW} Pulling FlytOS docker image. It will download around 1GB of data, and may take several minutes...${NC}"
+image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
+docker image inspect image_name > /dev/null
+if [ $? -ne 0 ]
+	then
+	docker pull $image_name
+	if [ $? -eq 0 ]
+		then
+		echo -e "\n${GRN} Image has been pulled.${NC}"
+	else
+		echo -e "\n${RED}ERROR${NC}: Image pull failed. Run this script again. Make sure you are connected to internet, otherwise please contact us at http://forums.flytbase.com${NC}"
+	fi
+fi
+
+echo -e "\n\n${GRN}Setup is now complete. Run sudo ./start.sh to start your FlytSim container${NC}"

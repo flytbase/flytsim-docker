@@ -2,9 +2,6 @@
 write-host ("`nThis script is going to start FlytSim session for you.")  -foreground green
 write-host ("`nVisit http://localhost/flytconsole in your browser to check connectivity with FlytSim`n`n")  -foreground cyan
 
-$image_name=$((get-content $PSScriptRoot\Dockerfile) | where {$_ -match 'FROM.+$' }).Trim().Split(" ")[1]
-$container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
-
 function replaceip {
     $localip = $(ipconfig | where {$_ -match 'IPv4.+\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' } | out-null; $Matches[1])
     (get-content $PSScriptRoot\docker-compose.yml) | foreach-object {$_ -replace "DISPLAY.+$", ("DISPLAY="+$localip+":1.0")} | set-content $PSScriptRoot\docker-compose.yml
@@ -82,7 +79,7 @@ function is_xming_installed_and_running {
 
 function close_ports {
     
-    Write-Host("Closing if any process is binded to ports (80,8080,5760)") -ForegroundColor Cyan
+    Write-Host("Closing if any process is binded to ports (80,8080,5760,9000)") -ForegroundColor Cyan
     $portPID=$(netstat -ano | Select-String -List ":80" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
     if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp") -and ($(ps -Id $portPID).ProcessName -ne "vpnkit"))
     {
@@ -103,6 +100,13 @@ function close_ports {
         echo "port 5760 seems to be in use by $(ps -Id $portPID).ProcessName"
         Stop-Process $portPID
     }
+
+    $portPID=$(netstat -ano | Select-String -List ":9000" | Select-String "LISTENING" | ConvertFrom-String | select P6 | Select-Object -Unique -ExpandProperty P6)
+    if(($portPID.Length -gt 0) -and ($(ps -Id $portPID).ProcessName -ne "com.docker.slirp") -and ($(ps -Id $portPID).ProcessName -ne "vpnkit"))
+    {
+        echo "port 9000 seems to be in use by $(ps -Id $portPID).ProcessName"
+        Stop-Process $portPID
+    }
 }
 
 function do_image_pull {
@@ -119,7 +123,6 @@ function do_image_pull {
 			docker-compose stop
 			docker commit -m "backing up user data on $(date)" $container_name "$($image_name.Split(":")[0]):backup"
 			docker rm $container_name
-            docker-compose build
 		}
 	}
 }
@@ -157,6 +160,10 @@ function start_docker {
 }
 
 cd $PSScriptRoot
+
+$image_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'image.+$' }).Trim().Split(" ")[1]
+$container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
+
 replaceip
 is_docker_installed_and_running
 is_xming_installed_and_running

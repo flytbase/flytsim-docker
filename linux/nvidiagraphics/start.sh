@@ -44,12 +44,14 @@ create_volume() {
 }
 
 close_ports() {
-	echo -e "${YLW}Closing processes binded to ports (80,8080,5760)${NC}"
+	echo -e "${YLW}Closing processes binded to ports (80,8080,5760,9000)${NC}"
 	pids=`echo $(lsof -t -i tcp:80 -s tcp:listen)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 	pids=`echo $(lsof -t -i tcp:8080 -s tcp:listen)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 	pids=`echo $(lsof -t -i tcp:5760 -s tcp:listen)`
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
+	pids=`echo $(lsof -t -i tcp:9000 -s tcp:listen)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "docker-proxy" ] && kill -9 $pids
 }
 
@@ -68,7 +70,6 @@ do_image_pull() {
 			docker-compose stop
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker rm $container_name
-			docker-compose build
 		fi
 	fi
 }
@@ -129,7 +130,9 @@ launch_flytsim() {
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
-image_name=`grep FROM Dockerfile | awk -F ' ' '{print $2}'`
+cd $root_loc
+
+image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}'`
 
 launch_flytsim

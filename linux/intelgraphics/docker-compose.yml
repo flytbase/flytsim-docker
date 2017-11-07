@@ -2,23 +2,24 @@
 version: '3'
 services:
   flytsim:
-    build: .
+    image: flytbase/flytsimv2:latest
     container_name: flytsim
     ports:
       - "80:80"
       - "8080:8080"
       - "5760:5760"
+      - "9000:9000"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - flytsim:/flyt
       - /run/udev:/run/udev:ro
-    command: sudo /start.sh Linux
+    command: /start.sh Linux
     environment:
       - DISPLAY
       - QT_X11_NO_MITSHM=1
     privileged: true
-    user: flytsim
-    working_dir: /home/flytsim
+    user: root
+    working_dir: /flyt
     hostname: flytsim
 
 volumes:

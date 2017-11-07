@@ -21,12 +21,14 @@ is_installed_and_running() {
 }
 
 close_ports() {
-	echo -e "${YLW}Closing processes binded to ports (80,8080,5760)${NC}"
+	echo -e "${YLW}Closing processes binded to ports (80,8080,5760,9000)${NC}"
 	pids=`echo $(lsof -t -iTCP:80 -sTCP:LISTEN)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
 	pids=`echo $(lsof -t -iTCP:8080 -sTCP:LISTEN)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
 	pids=`echo $(lsof -t -iTCP:5760 -sTCP:LISTEN)`
+	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
+	pids=`echo $(lsof -t -iTCP:9000 -sTCP:LISTEN)`
 	[ "$pids" != "" ] && [ "$(ps -p "$pids" -o comm=)" != "com.docker.slirp" ] && kill -9 $pids
 }
 
@@ -45,7 +47,6 @@ do_image_pull() {
 			docker-compose stop
 			docker commit -m "backing up user data on $(date)" $container_name $(echo $image_name | awk -F ':' '{print $1}'):backup
 			docker rm $container_name
-			docker-compose build
 		fi
 	fi
 }
@@ -100,7 +101,9 @@ launch_flytsim() {
 }
 
 root_loc=$(cd $(dirname $BASH_SOURCE) ; pwd -P)
-image_name=`grep FROM Dockerfile | awk -F ' ' '{print $2}' | tr -d "\r"`
+cd $root_loc
+
+image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
 container_name=`grep container_name docker-compose.yml | awk -F ' ' '{print $2}' | tr -d "\r"`
 
 launch_flytsim

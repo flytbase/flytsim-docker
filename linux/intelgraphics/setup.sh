@@ -62,11 +62,7 @@ if [ "$(uname -m)" != "amd64" ] && [ "$(uname -m)" != "x86_64" ]
 	exit 1
 fi
 
-if [ ! $(command -v lsb_release) > /dev/null ] || [ ! $(command -v pip) > /dev/null ]
-	then
-	apt-get update
-	apt-get install -y lsb-release python-pip
-fi
+apt-get update && apt-get install -y lsb-release python-pip
 
 # <detect ubuntu, exit if false>
 echo -e "${YLW}Verifying if this machine runs a flavor of Ubuntu or not${NC}"
@@ -130,7 +126,7 @@ cd $root_loc
 
 echo -e "\n${YLW} Pulling FlytOS docker image. It will download around 1GB of data, and may take several minutes...${NC}"
 image_name=`grep image docker-compose.yml | awk -F ' ' '{print $2}'`
-docker image inspect image_name > /dev/null
+docker image inspect $image_name > /dev/null
 if [ $? -ne 0 ]
 	then
 	docker pull $image_name

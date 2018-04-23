@@ -147,7 +147,7 @@ function start_docker {
         close_ports
         docker-compose up -d
         docker exec --user root $container_name bash -c "echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid"
-        docker-compose stop -t 1
+        docker-compose stop -t 3
     }
     Write-Host("`nLaunching FlytSim now in a new window.`n`n") -ForegroundColor Green
     Start-Process powershell "docker-compose up; pause"
@@ -165,7 +165,7 @@ $image_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 
 $container_name=$((get-content $PSScriptRoot\docker-compose.yml) | where {$_ -match 'container_name.+$' }).Trim().Split(" ")[1]
 
 replaceip
-is_docker_installed_and_running
+#is_docker_installed_and_running
 is_xming_installed_and_running
 do_image_pull
 Start-Job -scriptblock $openBrowser -Name "openbrowser" | Out-Null

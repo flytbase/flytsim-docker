@@ -81,7 +81,7 @@ docker_start() {
 		close_ports
 		docker-compose up -d
 		docker exec --user root $container_name bash -c "echo $UUID > /flyt/flytos/flytcore/share/core_api/scripts/hwid"
-		docker-compose stop -t 1
+		docker-compose stop -t 3
 	fi
 	
 	docker-compose up
@@ -94,7 +94,7 @@ docker_start() {
 }
 
 launch_flytsim() {
-	is_installed_and_running
+	# is_installed_and_running
 	do_image_pull
 	open_browser > /dev/null 2>&1 &
 	docker_start

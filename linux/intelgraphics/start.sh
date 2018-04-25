@@ -91,9 +91,9 @@ docker_start() {
 	fi
 
 	echo -e "\n\n${GRN}Launching FlytSim now in a new window.\n\n${NC}"
-	[ $(command -v gnome-terminal) > /dev/null ] && { gnome-terminal -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;} "'; exit 1; }
-	[ $(command -v x-terminal-emulator) > /dev/null ] && { x-terminal-emulator -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
-	[ $(command -v xterm) > /dev/null ] && { xterm -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"' & { exit 1; }; }
+	[ $(command -v gnome-terminal) > /dev/null ] && { gnome-terminal --command '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;} "'; if [ "$?" -eq 0 ]; then exit 1; fi }
+	[ $(command -v x-terminal-emulator) > /dev/null ] && { x-terminal-emulator -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"'; if [ "$?" -eq 0 ]; then exit 1; fi }
+	[ $(command -v xterm) > /dev/null ] && { xterm -e '/bin/bash -c "docker-compose up || { echo -e \"\n\n\033[0;31mERROR\033[0m: Problem encountered. Could not start Flytsim session\";exec /bin/bash -i;}"'; if [ "$?" -eq 0 ]; then exit 1; fi }
 	docker-compose up || { echo -e "\n\n${RED}ERROR${NC}: Problem encountered. Could not start Flytsim session. Exiting ..." && exit 1; }
 }
 

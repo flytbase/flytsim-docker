@@ -24,7 +24,7 @@ function is_docker_installed_and_running {
             pause
             exit    
         }
-        elseif ($windowsversion -match "Microsoft Windows 10")
+        elseif (($windowsversion -match "Microsoft Windows 10") -or ($windowsversion -match "Microsoft Windows 11"))
         {
             Get-Process "docker for windows" -ErrorAction SilentlyContinue | Out-Null
             if ($? -ne "True"){

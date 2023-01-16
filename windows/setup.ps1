@@ -16,7 +16,7 @@ if ($windowsversion -eq "Microsoft Windows 10 Home")
     pause
     exit
 }
-elseif ($windowsversion -match "Microsoft Windows 10")
+elseif (($windowsversion -match "Microsoft Windows 10") -or ($windowsversion -match "Microsoft Windows 11"))
 {
     "`nChecking if Docker is installed or not ..." 
 
